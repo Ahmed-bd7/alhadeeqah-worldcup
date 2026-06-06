@@ -64,14 +64,18 @@ def init_db():
     ''')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS processed_matches (
-            match_id INTEGER PRIMARY KEY
+            match_id INTEGER PRIMARY KEY,
+            actual_home INTEGER,
+            actual_away INTEGER
         )
     ''')
+    # تحديث الجدول لدعم تخزين النتائج الفعلية إذا لم تكن موجودة مسبقاً
     try:
-        cursor.execute("ALTER TABLE users ADD COLUMN password TEXT DEFAULT '1234'")
+        cursor.execute("ALTER TABLE processed_matches ADD COLUMN actual_home INTEGER")
+        cursor.execute("ALTER TABLE processed_matches ADD COLUMN actual_away INTEGER")
         conn.commit()
     except sqlite3.OperationalError:
-        pass 
+        pass
     return conn
 
 db_conn = init_db()
@@ -98,7 +102,7 @@ def get_internal_matches():
         {"id": 113, "team_home": "هولندا", "team_away": "الإكوادور", "time": datetime(2026, 6, 17, 19, 0, tzinfo=ksa_tz)},
         {"id": 114, "team_home": "كرواتيا", "team_away": "مصر", "time": datetime(2026, 6, 17, 22, 0, tzinfo=ksa_tz)},
         
-        # --- الجولة الثانية (قمم تكسير العظام) ---
+        # --- الجولة الثانية ---
         {"id": 201, "team_home": "المكسيك", "team_away": "الأرجنتين", "time": datetime(2026, 6, 18, 21, 0, tzinfo=ksa_tz)},
         {"id": 202, "team_home": "فرنسا", "team_away": "المغرب", "time": datetime(2026, 6, 19, 18, 0, tzinfo=ksa_tz)},
         {"id": 203, "team_home": "أمريكا", "team_away": "إسبانيا", "time": datetime(2026, 6, 19, 22, 0, tzinfo=ksa_tz)},
@@ -108,7 +112,7 @@ def get_internal_matches():
         {"id": 207, "team_home": "البرتغال", "team_away": "هولندا", "time": datetime(2026, 6, 22, 22, 0, tzinfo=ksa_tz)},
         {"id": 208, "team_home": "أوروجواي", "team_away": "كولومبيا", "time": datetime(2026, 6, 23, 20, 0, tzinfo=ksa_tz)},
         
-        # --- الجولة الثالثة الحاسمة (تحديد المتأهلين) ---
+        # --- الجولة الثالثة الحاسمة ---
         {"id": 301, "team_home": "المكسيك", "team_away": "المغرب", "time": datetime(2026, 6, 24, 21, 0, tzinfo=ksa_tz)},
         {"id": 302, "team_home": "الأرجنتين", "team_away": "كندا", "time": datetime(2026, 6, 24, 21, 0, tzinfo=ksa_tz)},
         {"id": 303, "team_home": "فرنسا", "team_away": "أستراليا", "time": datetime(2026, 6, 25, 18, 0, tzinfo=ksa_tz)},
@@ -121,7 +125,7 @@ def get_internal_matches():
         {"id": 310, "team_home": "البرتغال", "team_away": "كرواتيا", "time": datetime(2026, 6, 28, 22, 0, tzinfo=ksa_tz)},
     ]
 
-matches = get_internal_matches()
+all_matches = get_internal_matches()
 
 # 4. بوابـة التحكم للمستخدمين
 menu = ["تسجيل الدخول", "إنشاء حساب جديد (لأول مرة)"]
@@ -206,7 +210,7 @@ else:
                 user_preds = {r[0]: (r[1], r[2]) for r in cursor.fetchall()}
                 
                 review_list = []
-                for m in matches:
+                for m in all_matches:
                     m_desc = f"{m['team_home']} × {m['team_away']}"
                     if m["id"] in user_preds:
                         ph, pa = user_preds[m["id"]]
@@ -222,20 +226,24 @@ else:
             st.markdown("---")
             st.subheader("🔮 وضع توقعاتك الذكية")
             
-            for match in matches:
+            for match in all_matches:
                 time_until_match = match["time"] - now_ksa
                 
-                # فحص حالة المباراة من قاعدة البيانات لرؤية هل أدخل الأدمن نتيجتها
-                cursor.execute("SELECT match_id FROM processed_matches WHERE match_id = ?", (match["id"],))
-                is_done = cursor.fetchone()
+                # فحص حالة المباراة وتفاصيل نتيجتها المخزنة
+                cursor.execute("SELECT actual_home, actual_away FROM processed_matches WHERE match_id = ?", (match["id"],))
+                match_status_row = cursor.fetchone()
                 
-                if is_done:
-                    match_desc = f"{match['team_home']} × {match['team_away']} (انتهت واحتُسبت ✅)"
+                if match_status_row:
+                    match_desc = f"{match['team_home']} {match_status_row[0]} × {match_status_row[1]} {match['team_away']} (انتهت واحتُسبت ✅)"
                 else:
                     match_desc = f"{match['team_home']} × {match['team_away']}"
                 
-                # عرض المباراة بناءً على الوقت أو حالة الأدمن
-                if (timedelta(minutes=10) <= time_until_match <= timedelta(hours=360)) or (login_phone == ADMIN_PHONE) or is_done:
+                # ⚙️ [شرط العرض الذكي]: تظهر المباراة فقط إذا كانت منتهية، أو إذا كان موعدها خلال الـ 24 ساعة القادمة (أو للأدمن لمراجعتها دائماً)
+                is_within_24h = (timedelta(hours=0) <= time_until_match <= timedelta(hours=24))
+                # استثناء مبدئي خاص لمباريات يوم 11 يونيو لتظهر من الآن مباشرة بناءً على طلبك
+                is_june_11 = (match["time"].day == 11 and match["time"].month == 6)
+                
+                if is_within_24h or is_june_11 or match_status_row or (login_phone == ADMIN_PHONE):
                     with st.container():
                         st.markdown(f"""
                         <div class="match-card">
@@ -244,7 +252,7 @@ else:
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        if (time_until_match < timedelta(minutes=10) or is_done) and login_phone != ADMIN_PHONE:
+                        if (time_until_match < timedelta(minutes=10) or match_status_row) and login_phone != ADMIN_PHONE:
                             st.error("🔒 مغلق! انتهى الوقت القانوني أو المباراة انتهت فعلياً.")
                         else:
                             cursor.execute("SELECT pred_home, pred_away FROM predictions WHERE phone = ? AND match_id = ?", (login_phone, match["id"]))
@@ -267,71 +275,55 @@ else:
                                 db_conn.commit()
                                 st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
             
-            # 🛠️ --- لوحة التحكم الخاصة بأحمد بادحمان ---
+            # 🛠️ --- لوحة التحكم المتطورة الخاصة بأحمد بادحمان (إضافة التعديل والإلغاء الكامل) ---
             if login_phone == ADMIN_PHONE:
                 st.markdown("---")
                 st.markdown('<div class="admin-card">⚙️ <b>لوحة تحكم الإدارة الملكية (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
                 
-                st.subheader("🧮 إدخال النتائج الفعلية وحساب النقاط")
-                match_options = {f"{m['team_home']} × {m['team_away']}": m for m in matches}
-                selected_match_str = st.selectbox("إختر المباراة التي انتهت لتوزيع نقاطها:", list(match_options.keys()))
+                st.subheader("🧮 إدارة وإدخال نتائج المباريات")
+                match_options = {f"{m['team_home']} × {m['team_away']}": m for m in all_matches}
+                selected_match_str = st.selectbox("إختر المباراة المستهدفة لإدخال/تعديل نتيجتها:", list(match_options.keys()))
                 selected_match = match_options[selected_match_str]
                 
-                cursor.execute("SELECT match_id FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
+                cursor.execute("SELECT actual_home, actual_away FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
                 already_calculated = cursor.fetchone()
                 
                 if already_calculated:
-                    st.warning("⚠️ هذه المباراة احتُسبت نقاطها سابقاً.")
+                    st.warning(f"⚠️ هذه المباراة احتُسبت سابقاً بنتيجة: {already_calculated[0]} - {already_calculated[1]}")
+                    
+                    # 🔴 [خيار الإلغاء الكامل]: خصم النقاط وإعادة تصفير المباراة
+                    if st.button("🚨 إلغاء نتيجة المباراة وسحب النقاط من الأعضاء", key="cancel_btn"):
+                        # 1. جلب النتيجة القديمة لمعرفة الحسبة السابقة وخصمها
+                        old_h, old_a = already_calculated
+                        cursor.execute("SELECT phone, pred_home, pred_away FROM predictions WHERE match_id = ?", (selected_match["id"],))
+                        all_preds = cursor.fetchall()
+                        
+                        for pred in all_preds:
+                            user_phone, p_home, p_away = pred
+                            old_points = 0
+                            if p_home == old_h and p_away == old_a:
+                                old_points = 3
+                            elif (p_home > p_away and old_h > old_a) or \
+                                 (p_home < p_away and old_h < old_a) or \
+                                 (p_home == p_away and old_h == old_a):
+                                old_points = 1
+                            
+                            if old_points > 0:
+                                cursor.execute("UPDATE users SET points = MAX(0, points - ?) WHERE phone = ?", (old_points, user_phone))
+                        
+                        # 2. حذف المباراة من جدول المحسوبين
+                        cursor.execute("DELETE FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
+                        db_conn.commit()
+                        st.error(f"🔄 تم إلغاء المباراة وسحب النقاط بنجاح! عادت المباراة مفتوحة الآن.")
+                        st.rerun()
                 
                 col_h, col_a = st.columns(2)
                 with col_h:
-                    actual_h = st.number_input(f"النتيجة الفعلية لـ {selected_match['team_home']}", 0, 10, key="act_h")
+                    default_h = already_calculated[0] if already_calculated else 0
+                    actual_h = st.number_input(f"النتيجة الفعلية لـ {selected_match['team_home']}", 0, 10, value=default_h, key="act_h")
                 with col_a:
-                    actual_a = st.number_input(f"النتيجة الفعلية لـ {selected_match['team_away']}", 0, 10, key="act_a")
+                    default_a = already_calculated[1] if already_calculated else 0
+                    actual_a = st.number_input(f"النتيجة الفعلية لـ {selected_match['team_away']}", 0, 10, value=default_a, key="act_a")
                 
-                if st.button("🔥 احسب النقاط وحدث الصدارة فوراً!", disabled=True if already_calculated else False):
-                    cursor.execute("SELECT phone, pred_home, pred_away FROM predictions WHERE match_id = ?", (selected_match["id"],))
-                    all_preds = cursor.fetchall()
-                    for pred in all_preds:
-                        user_phone, p_home, p_away = pred
-                        calculated_points = 0
-                        if p_home == actual_h and p_away == actual_a:
-                            calculated_points = 3
-                        elif (p_home > p_away and actual_h > actual_a) or \
-                             (p_home < p_away and actual_h < actual_a) or \
-                             (p_home == p_away and actual_h == actual_a):
-                            calculated_points = 1
-                        if calculated_points > 0:
-                            cursor.execute("UPDATE users SET points = points + ? WHERE phone = ?", (calculated_points, user_phone))
-                    cursor.execute("INSERT INTO processed_matches (match_id) VALUES (?)", (selected_match["id"],))
-                    db_conn.commit()
-                    st.success(f"🏆 تم احتساب وتأمين نقاط مباراة ({selected_match_str}) بنجاح!")
-                    st.rerun()
-
-                st.subheader("🛠️ شاشة إدارة قاعدة البيانات الفورية")
-                cursor.execute("SELECT name, phone, points, password FROM users")
-                all_users_list = cursor.fetchall()
-                user_options = {f"{u[0]} ({u[1]})": u for u in all_users_list}
-                
-                if user_options:
-                    selected_user_str = st.selectbox("إختر العضو المستهدف:", list(user_options.keys()))
-                    target_user_data = user_options[selected_user_str]
-                    
-                    c_edit, c_del = st.columns(2)
-                    with c_edit:
-                        new_pts = st.number_input("تعديل مجموع نقاطه الكلي إلى:", 0, 500, value=target_user_data[2])
-                        new_user_pass = st.text_input(f"تعديل كلمة مرور {target_user_data[0]} إلى:", value=target_user_data[3])
-                        if st.button("💾 حفظ وتعديل البيانات"):
-                            cursor.execute("UPDATE users SET points = ?, password = ? WHERE phone = ?", (new_pts, new_user_pass, target_user_data[1]))
-                            db_conn.commit()
-                            st.success("تم تحديث البيانات بنجاح!")
-                            st.rerun()
-                            
-                    with c_del:
-                        st.markdown("<br>", unsafe_allow_html=True)
-                        if st.button("❌ حذف هذا العضو نهائياً"):
-                            cursor.execute("DELETE FROM users WHERE phone = ?", (target_user_data[1],))
-                            cursor.execute("DELETE FROM predictions WHERE phone = ?", (target_user_data[1],))
-                            db_conn.commit()
-                            st.error("تم حذف العضو!")
-                            st.rerun()
+                # زر موحد للحفظ أو التعديل
+                btn_label = "📝 تحديث وتعديل النقاط الحالية" if already_calculated else "🔥 احسب النقاط وحدث الصدارة فوراً!"
