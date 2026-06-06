@@ -26,7 +26,7 @@ st.markdown("""
     }
     .admin-card {
         background-color: #fff3cd; border-radius: 15px; padding: 20px;
-        border-right: 10px solid #ffc107; margin-top: 30px;
+        border-right: 10px solid #ffc107; margin-top: 30px; margin-bottom: 20px;
     }
     .review-card {
         background-color: #e8f5e9; border-radius: 15px; padding: 20px;
@@ -41,7 +41,7 @@ st.markdown("""
     <div class="main-title">🌿 بوابـة الحديقة الرقمية الذكية 🏆</div>
     """, unsafe_allow_html=True)
 
-# 2. إنشاء وإعداد قاعدة البيانات المحلية (SQLite)
+# 2. إنشاء وإعداد قاعدة البيانات المحلية مع إضافة حقل الرقم السري
 def init_db():
     conn = sqlite3.connect('alhadeeqah_db.db', check_same_thread=False)
     cursor = conn.cursor()
@@ -49,7 +49,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             name TEXT NOT NULL,
             points INTEGER DEFAULT 0,
-            phone TEXT PRIMARY KEY
+            phone TEXT PRIMARY KEY,
+            password TEXT DEFAULT '1234'
         )
     ''')
     cursor.execute('''
@@ -66,7 +67,14 @@ def init_db():
             match_id INTEGER PRIMARY KEY
         )
     ''')
-    conn.commit()
+    
+    # كود ذكي لتحديث قواعد البيانات القديمة تلقائياً وإضافة عمود الباسوورد دون حدوث كراش
+    try:
+        cursor.execute("ALTER TABLE users ADD COLUMN password TEXT DEFAULT '1234'")
+        conn.commit()
+    except sqlite3.OperationalError:
+        pass # العمود موجود مسبقاً، لا تفعل شيئاً
+        
     return conn
 
 db_conn = init_db()
@@ -93,19 +101,22 @@ matches = [
 menu = ["تسجيل الدخول", "إنشاء حساب جديد (لأول مرة)"]
 choice = st.radio("إختر الإجراء:", menu, horizontal=True)
 
-# --- شاشة إنشاء الحساب الجديد ---
+# --- شاشة إنشاء الحساب الجديد بالباسوورد ---
 if choice == "إنشاء حساب جديد (لأول مرة)":
     st.subheader("📝 استمارة تسجيل مشارك جديد")
     with st.form("registration_form"):
         new_name = st.text_input("👤 الاسم الثنائي الكريم:")
         new_phone = st.text_input("📱 رقم الجوال (10 أرقام):", max_chars=10)
+        new_pass = st.text_input("🔐 اختر كلمة مرور خاصة بحسابك (سرية):", type="password")
         submit_reg = st.form_submit_button("إرسال واعتماد الحساب في الحديقة 🚀")
         
         if submit_reg:
             new_phone = str(new_phone).strip()
             new_name = str(new_name).strip()
-            if not new_name or not new_phone:
-                st.error("❌ فضلاً، يرجى تعبئة جميع الخانات.")
+            new_pass = str(new_pass).strip()
+            
+            if not new_name or not new_phone or not new_pass:
+                st.error("❌ فضلاً، يرجى تعبئة جميع الخانات (الاسم، الجوال، وكلمة المرور).")
             elif len(new_phone) != 10 or not new_phone.isdigit():
                 st.error("❌ رقم الجوال يجب أن يتكون من 10 أرقام فقط.")
             else:
@@ -114,24 +125,29 @@ if choice == "إنشاء حساب جديد (لأول مرة)":
                 if cursor.fetchone():
                     st.error(f"⚠️ خطأ: رقم الجوال ({new_phone}) مسجل مسبقاً!")
                 else:
-                    cursor.execute("INSERT INTO users (name, points, phone) VALUES (?, ?, ?)", (new_name, 0, new_phone))
+                    cursor.execute("INSERT INTO users (name, points, phone, password) VALUES (?, ?, ?, ?)", (new_name, 0, new_phone, new_pass))
                     db_conn.commit()
-                    st.success(f"🎉 تم إنشاء حسابك بنجاح يا {new_name}! توجه الآن لصفحة تسجيل الدخول.")
+                    st.success(f"🎉 تم إنشاء حسابك المؤمن بنجاح يا {new_name}! توجه الآن لصفحة تسجيل الدخول برقمك وباسووردك.")
                     st.balloons()
 
-# --- شاشة تسجيل الدخول المعتمدة ---
+# --- شاشة تسجيل الدخول المعتمدة بالتحقق الثنائي ---
 else:
     st.subheader("🔐 تسجيل دخول مشاركي الحديقة")
-    login_phone = st.text_input("📱 أدخل رقم جوالك المعتمد للدخول:", max_chars=10)
+    login_phone = st.text_input("📱 أدخل رقم جوالك المعتمد:", max_chars=10)
+    login_pass = st.text_input("🔐 أدخل كلمة المرور الخاصة بك:", type="password")
     
-    if login_phone:
+    if login_phone and login_pass:
         login_phone = str(login_phone).strip()
+        login_pass = str(login_pass).strip()
+        
         cursor = db_conn.cursor()
-        cursor.execute("SELECT name, phone FROM users WHERE phone = ?", (login_phone,))
+        cursor.execute("SELECT name, password FROM users WHERE phone = ?", (login_phone,))
         user_row = cursor.fetchone()
         
         if not user_row:
             st.error("❌ رقم الجوال هذا غير مسجل مسبقاً! يرجى إنشاء حساب جديد أولاً.")
+        elif user_row[1] != login_pass:
+            st.error("❌ كلمة المرور غير صحيحة! يرجى التحقق وإعادة المحاولة.")
         else:
             user_name = user_row[0]
             st.success(f"مرحباً بعودتك يا {user_name}! 😎")
@@ -141,11 +157,9 @@ else:
             cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
             leaderboard_data = cursor.fetchall()
             
-            # بناء جدول صدارة تفاعلي يحتوي على ميزة مراجعة التوقعات
             for idx, row in enumerate(leaderboard_data):
                 p_name, p_points, p_phone = row
                 col_rank, col_name, col_pts, col_action = st.columns([1, 4, 2, 3])
-                
                 with col_rank:
                     st.markdown(f"**#{idx+1}**")
                 with col_name:
@@ -157,11 +171,9 @@ else:
                         st.session_state[f"view_predictions_for"] = p_phone
                         st.session_state[f"view_predictions_name"] = p_name
             
-            # شاشة منبثقة/سفلية تعرض مراجعة توقعات العضو المختار
             if f"view_predictions_for" in st.session_state:
                 target_phone = st.session_state[f"view_predictions_for"]
                 target_name = st.session_state[f"view_predictions_name"]
-                
                 st.markdown(f"""<div class="review-card">🔍 <b>كشف توقعات المشارك: {target_name}</b></div>""", unsafe_allow_html=True)
                 
                 cursor.execute("SELECT match_id, pred_home, pred_away FROM predictions WHERE phone = ?", (target_phone,))
@@ -188,8 +200,6 @@ else:
                 time_until_match = match["time"] - now_ksa
                 match_desc = f"{match['team_home']} × {match['team_away']}"
                 
-                # 🛑 التحكم في الظهور وقفل التوقع: تظهر قبل المباراة بـ 48 ساعة، وتقفل قبلها بـ 10 دقائق
-                # للأدمن تظهر دائماً لأغراض التجريب والاختبار
                 if (timedelta(minutes=10) <= time_until_match <= timedelta(hours=48)) or (login_phone == ADMIN_PHONE):
                     with st.container():
                         st.markdown(f"""
@@ -199,9 +209,8 @@ else:
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        # قفل التوقع العادي إذا شارف الموعد على البدء (أقل من 10 دقائق)
                         if time_until_match < timedelta(minutes=10) and login_phone != ADMIN_PHONE:
-                            st.error("🔒 مغلق تلقائياً! انتهى الوقت القانوني للتوقع (قفل قبل المباراة بـ 10 دقائق).")
+                            st.error("🔒 مغلق تلقائياً! انتهى الوقت القانوني للتوقع.")
                         else:
                             cursor.execute("SELECT pred_home, pred_away FROM predictions WHERE phone = ? AND match_id = ?", (login_phone, match["id"]))
                             existing_pred = cursor.fetchone()
@@ -227,8 +236,8 @@ else:
             if login_phone == ADMIN_PHONE:
                 st.markdown("---")
                 st.markdown('<div class="admin-card">⚙️ <b>لوحة تحكم الإدارة الملكية (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
-                st.subheader("🧮 إدخال النتائج الفعلية وحساب النقاط")
                 
+                st.subheader("🧮 إدخال النتائج الفعلية وحساب النقاط")
                 match_options = {f"{m['team_home']} × {m['team_away']}": m for m in matches}
                 selected_match_str = st.selectbox("إختر المباراة التي انتهت لتوزيع نقاطها:", list(match_options.keys()))
                 selected_match = match_options[selected_match_str]
@@ -248,24 +257,63 @@ else:
                 if st.button("🔥 احسب النقاط وحدث الصدارة فوراً!", disabled=True if already_calculated else False):
                     cursor.execute("SELECT phone, pred_home, pred_away FROM predictions WHERE match_id = ?", (selected_match["id"],))
                     all_preds = cursor.fetchall()
-                    
                     for pred in all_preds:
                         user_phone, p_home, p_away = pred
                         calculated_points = 0
-                        
-                        # 1. التوقع الصحيح بالملي -> 3 نقاط
                         if p_home == actual_h and p_away == actual_a:
                             calculated_points = 3
-                        # 2. توقع الفائز أو التعادل صحيح والأرقام تختلف -> نقطة واحدة
                         elif (p_home > p_away and actual_h > actual_a) or \
                              (p_home < p_away and actual_h < actual_a) or \
                              (p_home == p_away and actual_h == actual_a):
                             calculated_points = 1
-                        
                         if calculated_points > 0:
                             cursor.execute("UPDATE users SET points = points + ? WHERE phone = ?", (calculated_points, user_phone))
-                    
                     cursor.execute("INSERT INTO processed_matches (match_id) VALUES (?)", (selected_match["id"],))
                     db_conn.commit()
-                    st.success(f"🏆 تم احتساب وتأمين نقاط مباراة ({selected_match_str}) بنجاح! وتحديث الصدارة حياً.")
+                    st.success(f"🏆 تم احتساب وتأمين نقاط مباراة ({selected_match_str}) بنجاح!")
                     st.rerun()
+
+                st.markdown("---")
+                st.subheader("🛠️ شاشة إدارة قاعدة البيانات الفورية (والتحكم بالباسوورد)")
+                
+                cursor.execute("SELECT name, phone, points, password FROM users")
+                all_users_list = cursor.fetchall()
+                user_options = {f"{u[0]} ({u[1]})": u for u in all_users_list}
+                
+                if user_options:
+                    selected_user_str = st.selectbox("إختر العضو المستهدف:", list(user_options.keys()))
+                    target_user_data = user_options[selected_user_str]
+                    
+                    c_edit, c_del = st.columns(2)
+                    with c_edit:
+                        new_pts = st.number_input("تعديل مجموع نقاطه الكلي إلى:", 0, 500, value=target_user_data[2])
+                        # ميزة إظهار وتعديل باسوورد العضو
+                        new_user_pass = st.text_input(f"تعديل كلمة مرور {target_user_data[0]} إلى:", value=target_user_data[3])
+                        
+                        if st.button("💾 حفظ وتعديل البيانات"):
+                            cursor.execute("UPDATE users SET points = ?, password = ? WHERE phone = ?", (new_pts, new_user_pass, target_user_data[1]))
+                            db_conn.commit()
+                            st.success(f"تم تحديث بيانات {target_user_data[0]} بنجاح!")
+                            st.rerun()
+                            
+                    with c_del:
+                        st.markdown("<br>", unsafe_allow_html=True)
+                        if st.button("❌ حذف هذا العضو نهائياً من السستم"):
+                            cursor.execute("DELETE FROM users WHERE phone = ?", (target_user_data[1],))
+                            cursor.execute("DELETE FROM predictions WHERE phone = ?", (target_user_data[1],))
+                            db_conn.commit()
+                            st.error(f"تم حذف العضو {target_user_data[0]} وجميع توقعاته!")
+                            st.rerun()
+                
+                st.markdown("---")
+                st.markdown("⚙️ **خيارات متقدمة لإعادة الضبط (إجراءات حساسة):**")
+                
+                calculated_match_options = {}
+                cursor.execute("SELECT match_id FROM processed_matches")
+                proc_ids = [r[0] for r in cursor.fetchall()]
+                for m in matches:
+                    if m["id"] in proc_ids:
+                        calculated_match_options[f"{m['team_home']} × {m['team_away']}"] = m["id"]
+                
+                if calculated_match_options:
+                    m_to_reset = st.selectbox("إختر مباراة تم
