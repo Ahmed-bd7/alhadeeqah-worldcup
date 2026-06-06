@@ -34,16 +34,13 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # 2. إنشاء الاتصال التلقائي والمعتمد بـ Google Sheets
-# هنا السستم سيقرأ الرابط تلقائياً من [connections.gsheets] ويفتح صلاحية الكتابة بالكامل
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-@st.cache_data(ttl=0)
+# دالة ذكية ومحدثة لجلب البيانات بدون Cache لتحديث مستمر
 def load_data(sheet_name):
     try:
-        # القراءة التلقائية بدون تمرير رابط يدوي لمنع خطأ الـ UnsupportedOperation
-        return conn.read(worksheet=sheet_name)
+        return conn.read(worksheet=sheet_name, ttl="0m")
     except Exception as e:
-        st.warning(f"⚠️ يرجى التأكد من أن اسم الصفحة أسفل الشيت هو '{sheet_name}' تماماً وبدون مسافات.")
         return pd.DataFrame()
 
 df_users = load_data("users")
@@ -91,10 +88,13 @@ if choice == "إنشاء حساب جديد (لأول مرة)":
                     new_user_df = pd.DataFrame([{"المشارك": new_name, "النقاط": 0, "الجوال": new_phone}])
                     df_users = pd.concat([df_users, new_user_df], ignore_index=True)
                     
-                    # التحديث التلقائي الآمن بدون تمرير رابط في الدالة
-                    conn.update(worksheet="users", data=df_users)
-                    st.success(f"🎉 تم إنشاء حسابك بنجاح يا {new_name}! توجه لشاشة تسجيل الدخول.")
-                    st.rerun()
+                    # الرفع باستخدام وضع الحساب المعتمد
+                    try:
+                        conn.update(worksheet="users", data=df_users)
+                        st.success(f"🎉 تم إنشاء حسابك بنجاح يا {new_name}! توجه لشاشة تسجيل الدخول.")
+                        st.cache_data.clear() # تنظيف الذاكرة لقراءة البيانات الجديدة فوراً
+                    except Exception as ex:
+                        st.error(f"حدث خطأ أثناء الحفظ، يرجى التأكد من صلاحية Editor للشيت: {ex}")
 
 # --- شاشة تسجيل الدخول المعتادة ---
 else:
@@ -151,7 +151,10 @@ else:
                                 new_pred = pd.DataFrame([{"الجوال": login_phone, "المباراة": match["id"], "توقع_1": h_score, "توقع_2": a_score}])
                                 df_preds = pd.concat([df_preds, new_pred], ignore_index=True)
                                 
-                                # التحديث التلقائي الآمن بدون تمرير رابط في الدالة
-                                conn.update(worksheet="predictions", data=df_preds)
-                                st.success("تم تسجيل توقعك الفريد بأمان في السيرفر! 🏁")
+                                try:
+                                    conn.update(worksheet="predictions", data=df_preds)
+                                    st.success("تم تسجيل توقعك الفريد بأمان في السيرفر! 🏁")
+                                    st.cache_data.clear()
+                                except Exception as ex:
+                                    st.error(f"خطأ أثناء حفظ التوقع: {ex}")
                     st.markdown("<br>", unsafe_allow_html=True)
