@@ -80,20 +80,23 @@ db_conn = init_db()
 # رقم أدمن الحديقة الثابت
 ADMIN_PHONE = "0502518301" 
 
-# 🌐 3. إعدادات الـ API الفنية المربوطة بمفتاحك وكأس العالم
-API_KEY = "3a57379657b569a7a6abe3176fe85b10"  # مفتاح أحمد المعتمد
-LEAGUE_ID = 1  # كود كأس العالم الرسمي
+# 🌐 3. إعدادات الـ API والمفتاح الرسمي لكأس العالم 2026
+API_KEY = "3a57379657b569a7a6abe3176fe85b10"
+LEAGUE_ID = 1  
 CURRENT_YEAR = 2026
 
+# 🔄 دالة جلب المباريات وأتمتة حساب النقاط تلقائياً
 @st.cache_data(ttl=300)  # تحديث ذكي كل 5 دقائق
-def fetch_matches_from_api(api_key, league_id, year):
+def fetch_and_process_matches(api_key, league_id, year):
     url = "https://v3.football.api-sports.io/fixtures"
     headers = {
         'x-rapidapi-key': api_key,
         'x-rapidapi-host': 'v3.football.api-sports.io'
     }
     
-    # حلقة ذكية للبحث في تصنيفات المواسم المختلفة لتأكيد جلب مباريات الـ 48 فريق كاملة
+    fetched_matches = []
+    api_success = False
+    
     for season in [year, year-1, year-2]:
         try:
             params = {'league': league_id, 'season': season}
@@ -101,33 +104,74 @@ def fetch_matches_from_api(api_key, league_id, year):
             data = response.json()
             
             if "response" in data and len(data["response"]) > 0:
-                fetched_matches = []
+                cursor = db_conn.cursor()
+                
                 for item in data["response"]:
                     fixture = item["fixture"]
                     teams = item["teams"]
+                    goals = item["goals"]
                     
-                    # تحويل وقت الفيفا العالمي (UTC) إلى توقيت المملكة (KSA) أوتوماتيكياً
                     utc_time = datetime.strptime(fixture["date"], "%Y-%m-%dT%H:%M:%S%z")
                     ksa_time = utc_time.astimezone(ksa_tz)
                     
+                    match_id = fixture["id"]
+                    status = fixture["status"]["short"]  # حالة المباراة (FT تعني انتهت)
+                    
                     fetched_matches.append({
-                        "id": fixture["id"],
+                        "id": match_id,
                         "team_home": teams["home"]["name"],
                         "team_away": teams["away"]["name"],
-                        "time": ksa_time
+                        "time": ksa_time,
+                        "status": status,
+                        "goals_home": goals["home"],
+                        "goals_away": goals["away"]
                     })
+                    
+                    # 🤖 [الأتمتة الذكية]: إذا انتهت المباراة ولم تحسب نقاطها بعد
+                    if status == "FT" and goals["home"] is not None and goals["away"] is not None:
+                        cursor.execute("SELECT match_id FROM processed_matches WHERE match_id = ?", (match_id,))
+                        if not cursor.fetchone():
+                            actual_h = goals["home"]
+                            actual_a = goals["away"]
+                            
+                            # جلب توقعات الشباب لهذه المباراة
+                            cursor.execute("SELECT phone, pred_home, pred_away FROM predictions WHERE match_id = ?", (match_id,))
+                            all_preds = cursor.fetchall()
+                            
+                            for pred in all_preds:
+                                user_phone, p_home, p_away = pred
+                                calculated_points = 0
+                                
+                                # 3 نقاط للتوقع الصحيح بالملي
+                                if p_home == actual_h and p_away == actual_a:
+                                    calculated_points = 3
+                                # نقطة واحدة لتوقع الفائز أو التعادل
+                                elif (p_home > p_away and actual_h > actual_a) or \
+                                     (p_home < p_away and actual_h < actual_a) or \
+                                     (p_home == p_away and actual_h == actual_a):
+                                    calculated_points = 1
+                                    
+                                if calculated_points > 0:
+                                    cursor.execute("UPDATE users SET points = points + ? WHERE phone = ?", (calculated_points, user_phone))
+                            
+                            # قفل المباراة كمعالجة بنجاح
+                            cursor.execute("INSERT INTO processed_matches (match_id) VALUES (?)", (match_id,))
+                            db_conn.commit()
+                            
                 fetched_matches.sort(key=lambda x: x["time"])
+                api_success = True
                 return fetched_matches
         except Exception as e:
             continue
             
-    # جدول احتياطي مؤقت يظهر فقط في حال فشل الاتصال التام بالـ API
-    return [
-        {"id": 901, "team_home": "المكسيك (احتياطي)", "team_away": "جنوب أفريقيا", "time": datetime(2026, 6, 11, 22, 0, tzinfo=ksa_tz)},
-        {"id": 902, "team_home": "السعودية (احتياطي)", "team_away": "كندا", "time": datetime(2026, 6, 16, 1, 0, tzinfo=ksa_tz)}
-    ]
+    if not api_success:
+        return [
+            {"id": 901, "team_home": "المكسيك (احتياطي)", "team_away": "جنوب أفريقيا", "time": datetime(2026, 6, 11, 22, 0, tzinfo=ksa_tz), "status": "NS", "goals_home": None, "goals_away": None},
+            {"id": 902, "team_home": "السعودية (احتياطي)", "team_away": "كندا", "time": datetime(2026, 6, 16, 1, 0, tzinfo=ksa_tz), "status": "NS", "goals_home": None, "goals_away": None}
+        ]
 
-matches = fetch_matches_from_api(API_KEY, LEAGUE_ID, CURRENT_YEAR)
+# تشغيل الأتمتة الفورية وحفظ القائمة المحدثة لايف
+matches = fetch_and_process_matches(API_KEY, LEAGUE_ID, CURRENT_YEAR)
 
 # 4. بوابـة التحكم للمستخدمين
 menu = ["تسجيل الدخول", "إنشاء حساب جديد (لأول مرة)"]
@@ -230,9 +274,14 @@ else:
             
             for match in matches:
                 time_until_match = match["time"] - now_ksa
-                match_desc = f"{match['team_home']} × {match['team_away']}"
                 
-                if (timedelta(minutes=10) <= time_until_match <= timedelta(hours=48)) or (login_phone == ADMIN_PHONE):
+                # إظهار نتيجة المباراة الحقيقية بجانبها إذا كانت انتهت أو تلعب الآن
+                if match["status"] == "FT":
+                    match_desc = f"{match['team_home']} {match['goals_home']} × {match['goals_away']} {match['team_away']} (انتهت ✅)"
+                else:
+                    match_desc = f"{match['team_home']} × {match['team_away']}"
+                
+                if (timedelta(minutes=10) <= time_until_match <= timedelta(hours=48)) or (login_phone == ADMIN_PHONE) or (match["status"] == "FT"):
                     with st.container():
                         st.markdown(f"""
                         <div class="match-card">
@@ -241,8 +290,9 @@ else:
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        if time_until_match < timedelta(minutes=10) and login_phone != ADMIN_PHONE:
-                            st.error("🔒 مغلق تلقائياً! انتهى الوقت القانوني للتوقع.")
+                        # منع التوقع إذا انتهت أو قفل وقتها
+                        if (time_until_match < timedelta(minutes=10) or match["status"] == "FT") and login_phone != ADMIN_PHONE:
+                            st.error("🔒 مغلق! انتهى الوقت القانوني أو المباراة انتهت فعلياً.")
                         else:
                             cursor.execute("SELECT pred_home, pred_away FROM predictions WHERE phone = ? AND match_id = ?", (login_phone, match["id"]))
                             existing_pred = cursor.fetchone()
@@ -255,7 +305,7 @@ else:
                             with c2:
                                 a_score = st.number_input(f"أهداف {match['team_away']}", 0, 10, value=val_away, key=f"a_{match['id']}")
                             
-                            if st.button(f"اعتماد التوقع لمباراة {match_desc}", key=f"btn_{match['id']}"):
+                            if st.button(f"اعتماد التوقع لمباراة {match['team_home']} × {match['team_away']}", key=f"btn_{match['id']}"):
                                 cursor.execute('''
                                     INSERT INTO predictions (phone, match_id, pred_home, pred_away)
                                     VALUES (?, ?, ?, ?)
@@ -264,50 +314,14 @@ else:
                                 db_conn.commit()
                                 st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
             
-            # 🛠️ --- لوحة التحكم السرية لأحمد بادحمان فقط ---
+            # 🛠️ --- لوحة التحكم الخاصة بأحمد بادحمان (أصبحت خفيفة لإدارة السستم فقط) ---
             if login_phone == ADMIN_PHONE:
                 st.markdown("---")
                 st.markdown('<div class="admin-card">⚙️ <b>لوحة تحكم الإدارة الملكية (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
                 
-                st.subheader("🧮 إدخال النتائج الفعلية وحساب النقاط")
-                match_options = {f"{m['team_home']} × {m['team_away']}": m for m in matches}
-                selected_match_str = st.selectbox("إختر المباراة التي انتهت لتوزيع نقاطها:", list(match_options.keys()))
-                selected_match = match_options[selected_match_str]
+                st.info("💡 النظام الآن يعمل مؤتمتاً بالكامل. النتائج تُحسب وتُوزع تلقائياً فور نهاية المباريات عبر الـ API.")
                 
-                cursor.execute("SELECT match_id FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
-                already_calculated = cursor.fetchone()
-                
-                if already_calculated:
-                    st.warning("⚠️ هذه المباراة احتُسبت نقاطها سابقاً.")
-                
-                col_h, col_a = st.columns(2)
-                with col_h:
-                    actual_h = st.number_input(f"النتيجة الفعلية لـ {selected_match['team_home']}", 0, 10, key="act_h")
-                with col_a:
-                    actual_a = st.number_input(f"النتيجة الفعلية لـ {selected_match['team_away']}", 0, 10, key="act_a")
-                
-                if st.button("🔥 احسب النقاط وحدث الصدارة فوراً!", disabled=True if already_calculated else False):
-                    cursor.execute("SELECT phone, pred_home, pred_away FROM predictions WHERE match_id = ?", (selected_match["id"],))
-                    all_preds = cursor.fetchall()
-                    for pred in all_preds:
-                        user_phone, p_home, p_away = pred
-                        calculated_points = 0
-                        if p_home == actual_h and p_away == actual_a:
-                            calculated_points = 3
-                        elif (p_home > p_away and actual_h > actual_a) or \
-                             (p_home < p_away and actual_h < actual_a) or \
-                             (p_home == p_away and actual_h == actual_a):
-                            calculated_points = 1
-                        if calculated_points > 0:
-                            cursor.execute("UPDATE users SET points = points + ? WHERE phone = ?", (calculated_points, user_phone))
-                    cursor.execute("INSERT INTO processed_matches (match_id) VALUES (?)", (selected_match["id"],))
-                    db_conn.commit()
-                    st.success(f"🏆 تم احتساب وتأمين نقاط مباراة ({selected_match_str}) بنجاح!")
-                    st.rerun()
-
-                st.markdown("---")
                 st.subheader("🛠️ شاشة إدارة قاعدة البيانات الفورية")
-                
                 cursor.execute("SELECT name, phone, points, password FROM users")
                 all_users_list = cursor.fetchall()
                 user_options = {f"{u[0]} ({u[1]})": u for u in all_users_list}
@@ -336,27 +350,10 @@ else:
                             st.rerun()
                 
                 st.markdown("---")
-                st.markdown("⚙️ **خيارات متقدمة لإعادة الضبط:**")
-                
-                calculated_match_options = {}
-                cursor.execute("SELECT match_id FROM processed_matches")
-                proc_ids = [r[0] for r in cursor.fetchall()]
-                for m in matches:
-                    if m["id"] in proc_ids:
-                        calculated_match_options[f"{m['team_home']} × {m['team_away']}"] = m["id"]
-                
-                if calculated_match_options:
-                    m_to_reset = st.selectbox("إختر مباراة تم حسابها لتريد مسح حسبتها وإعادة تفعيلها:", list(calculated_match_options.keys()))
-                    if st.button("🔄 إعادة تفعيل وحذف قفل الحسبة للمباراة"):
-                        cursor.execute("DELETE FROM processed_matches WHERE match_id = ?", (calculated_match_options[m_to_reset],))
-                        db_conn.commit()
-                        st.success("تم فك قفل المباراة!")
-                        st.rerun()
-                
                 if st.button("🚨 تصفير قاعدة البيانات بالكامل"):
                     cursor.execute("DELETE FROM users")
                     cursor.execute("DELETE FROM predictions")
-                    cursor.execute("DELETE FROM processed_matches")
+                    cursor.execute("DELETE協會 FROM processed_matches")
                     db_conn.commit()
                     st.success("تم تصفير السستم بالكامل!")
                     st.rerun()
