@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 import pytz
 import pandas as pd
-from streamlit_gsheets import GSheetsConnection
+import gspread
 
 # 1. إعداد المنطقة الزمنية وتنسيق الصفحة
 ksa_tz = pytz.timezone('Asia/Riyadh')
@@ -33,18 +33,24 @@ st.markdown("""
     <div class="main-title">🌿 بوابـة الحديقة الرقمية الذكية 🏆</div>
     """, unsafe_allow_html=True)
 
-# 2. إنشاء الاتصال التلقائي والمعتمد بـ Google Sheets
-conn = st.connection("gsheets", type=GSheetsConnection)
-
-# دالة ذكية ومحدثة لجلب البيانات بدون Cache لتحديث مستمر
-def load_data(sheet_name):
-    try:
-        return conn.read(worksheet=sheet_name, ttl="0m")
-    except Exception as e:
-        return pd.DataFrame()
-
-df_users = load_data("users")
-df_preds = load_data("predictions")
+# 2. الاتصال الذكي والمباشر بـ Google Sheets عبر gspread
+try:
+    # الاتصال بالملف كـ مستخدم عام لديه صلاحية التعديل
+    gc = gspread.public()
+    sheet_url = st.secrets["spreadsheet_url"]
+    sh = gc.open_by_url(sheet_url)
+    
+    # قراءة الصفحات
+    worksheet_users = sh.worksheet("users")
+    worksheet_preds = sh.worksheet("predictions")
+    
+    # تحويل البيانات إلى DataFrames لبثها في السستم
+    df_users = pd.DataFrame(worksheet_users.get_all_records())
+    df_preds = pd.DataFrame(worksheet_preds.get_all_records())
+except Exception as e:
+    # حل بديل ذكي في حال حدوث أي مشكلة مؤقتة في الشبكة
+    df_users = pd.DataFrame(columns=["المشارك", "النقاط", "الجوال"])
+    df_preds = pd.DataFrame(columns=["الجوال", "المباراة", "توقع_1", "توقع_2"])
 
 # 3. جدول المباريات الثابتة
 matches = [
@@ -85,16 +91,12 @@ if choice == "إنشاء حساب جديد (لأول مرة)":
                 if is_duplicate:
                     st.error(f"⚠️ خطأ: رقم الجوال ({new_phone}) مسجل مسبقاً!")
                 else:
-                    new_user_df = pd.DataFrame([{"المشارك": new_name, "النقاط": 0, "الجوال": new_phone}])
-                    df_users = pd.concat([df_users, new_user_df], ignore_index=True)
-                    
-                    # الرفع باستخدام وضع الحساب المعتمد
+                    # إضافة السطر الجديد مباشرة إلى الـ Google Sheet أوتوماتيكياً
                     try:
-                        conn.update(worksheet="users", data=df_users)
-                        st.success(f"🎉 تم إنشاء حسابك بنجاح يا {new_name}! توجه لشاشة تسجيل الدخول.")
-                        st.cache_data.clear() # تنظيف الذاكرة لقراءة البيانات الجديدة فوراً
+                        worksheet_users.append_row([new_name, 0, new_phone])
+                        st.success(f"🎉 تم إنشاء حسابك بنجاح يا {new_name}! توجه لشاشة تسجيل الدخول وباشر التوقع.")
                     except Exception as ex:
-                        st.error(f"حدث خطأ أثناء الحفظ، يرجى التأكد من صلاحية Editor للشيت: {ex}")
+                        st.error(f"تأكد أن الجدول بوضعية Editor (Anyone with link): {ex}")
 
 # --- شاشة تسجيل الدخول المعتادة ---
 else:
@@ -148,13 +150,10 @@ else:
                                 a_score = st.number_input("أهداف الثاني", 0, 10, key=f"a_{match['id']}")
                             
                             if st.button(f"اعتماد التوقع للمباراة", key=f"btn_{match['id']}"):
-                                new_pred = pd.DataFrame([{"الجوال": login_phone, "المباراة": match["id"], "توقع_1": h_score, "توقع_2": a_score}])
-                                df_preds = pd.concat([df_preds, new_pred], ignore_index=True)
-                                
                                 try:
-                                    conn.update(worksheet="predictions", data=df_preds)
-                                    st.success("تم تسجيل توقعك الفريد بأمان في السيرفر! 🏁")
-                                    st.cache_data.clear()
+                                    # حفظ التوقع مباشرة في صفحة predictions بقوقل شيتس
+                                    worksheet_preds.append_row([login_phone, match["id"], h_score, a_score])
+                                    st.success("تم تسجيل توقعك الفريد وبثه في السيرفر بنجاح! 🏁")
                                 except Exception as ex:
                                     st.error(f"خطأ أثناء حفظ التوقع: {ex}")
                     st.markdown("<br>", unsafe_allow_html=True)
