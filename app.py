@@ -2,7 +2,7 @@ import streamlit as st
 from datetime import datetime, timedelta
 import pytz
 import pandas as pd
-import requests
+from streamlit_gsheets import GSheetsConnection
 
 # 1. إعداد المنطقة الزمنية وتنسيق الصفحة
 ksa_tz = pytz.timezone('Asia/Riyadh')
@@ -10,7 +10,7 @@ now_ksa = datetime.now(ksa_tz)
 
 st.set_page_config(page_title="توقعات الحديقة 2026", page_icon="🌿", layout="centered")
 
-# تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
+# تصميم واجهة المستخدم (CSS)
 st.markdown("""
     <style>
     .stApp { background-color: #f4f9f4; }
@@ -33,33 +33,18 @@ st.markdown("""
     <div class="main-title">🌿 بوابـة الحديقة الرقمية الذكية 🏆</div>
     """, unsafe_allow_html=True)
 
-# 2. دالة جلب البيانات الذكية كـ CSV (سريعة ومضمونة ومجانية)
-def load_sheet_data(sheet_name):
+# 2. إنشاء الاتصال التلقائي بـ Google Sheets
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+# دالة قراءة البيانات مع إلغاء الكاش لضمان التحديث اللحظي المتبادل
+def load_live_data(sheet_name):
     try:
-        base_url = st.secrets["spreadsheet_url"].split('/edit')[0]
-        csv_url = f"{base_url}/gviz/tq?tqx=out:csv&sheet={sheet_name}"
-        return pd.read_csv(csv_url)
+        return conn.read(worksheet=sheet_name, ttl=0)
     except:
         return pd.DataFrame()
 
-# دالة حفظ البيانات الذكية في الجوجل شيت مباشرة عبر بروتوكول الـ Web Form
-def save_to_sheet(sheet_name, row_data):
-    try:
-        # محاكاة إرسال فورم لجوجل شيت لضمان الكتابة الفورية بدون قيود الـ Service Account
-        base_url = st.secrets["spreadsheet_url"].split('/edit')[0]
-        # نستخدم دالة تحديث مخفية ومضمونة لتسجيل الأسطر
-        return True
-    except:
-        return False
-
-df_users = load_sheet_data("users")
-df_preds = load_sheet_data("predictions")
-
-# تأمين الأعمدة في حال كان الشيت فارغاً تماماً في البداية
-if df_users.empty or "الجوال" not in df_users.columns:
-    df_users = pd.DataFrame(columns=["المشارك", "النقاط", "الجوال"])
-if df_preds.empty or "الجوال" not in df_preds.columns:
-    df_preds = pd.DataFrame(columns=["الجوال", "المباراة", "توقع_1", "توقع_2"])
+df_users = load_live_data("users")
+df_preds = load_live_data("predictions")
 
 # 3. جدول المباريات الثابتة
 matches = [
@@ -69,7 +54,7 @@ matches = [
     {"id": 10, "desc": "🇸🇦 السعودية × كندا 🇨🇦 🔥", "time": datetime(2026, 6, 16, 1, 0, tzinfo=ksa_tz), "actual_home": None, "actual_away": None}
 ]
 
-# 4. بوابـة التحكم (تبديل بين تسجيل الدخول وإنشاء حساب جديد)
+# 4. بوابـة التحكم
 menu = ["تسجيل الدخول", "إنشاء حساب جديد (لأول مرة)"]
 choice = st.radio("إختر الإجراء:", menu, horizontal=True)
 
@@ -91,62 +76,84 @@ if choice == "إنشاء حساب جديد (لأول مرة)":
             elif len(new_phone) != 10 or not new_phone.isdigit():
                 st.error("❌ رقم الجوال يجب أن يتكون من 10 أرقام فقط.")
             else:
-                df_users["الجوال"] = df_users["الجوال"].astype(str).str.strip()
-                if new_phone in df_users["الجوال"].values:
-                    st.error(f"⚠️ خطأ: رقم الجوال ({new_phone}) مسجل مسبقاً باسم بطل آخر!")
+                is_duplicate = False
+                if not df_users.empty and "الجوال" in df_users.columns:
+                    df_users["الجوال"] = df_users["الجوال"].astype(str).str.strip()
+                    if new_phone in df_users["الجوال"].values:
+                        is_duplicate = True
+                
+                if is_duplicate:
+                    st.error(f"⚠️ خطأ: رقم الجوال ({new_phone}) مسجل مسبقاً!")
                 else:
-                    # محاكاة الحفظ في الذاكرة المحلية الفورية وتأكيد البيانات للمستخدم
-                    st.success(f"🎉 كفو يا {new_name}! تم اعتماد رقم جوالك وحسابك بنجاح في السيرفر. توجه الآن لشاشة 'تسجيل الدخول' لتوقع مبارياتك فوراً!")
+                    new_user_df = pd.DataFrame([{"المشارك": new_name, "النقاط": 0, "الجوال": new_phone}])
+                    df_users = pd.concat([df_users, new_user_df], ignore_index=True)
+                    
+                    try:
+                        conn.update(worksheet="users", data=df_users)
+                        st.success(f"🎉 تم إنشاء حسابك بنجاح يا {new_name}! حول الآن إلى شاشة 'تسجيل الدخول' للبدء.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error("⚠️ تأكد من تغيير صلاحية الرابط في قوقل شيت إلى Editor (محرر) وليس عارض.")
 
-# --- شاشة تسجيل الدخول المعتادة ---
+# --- شاشة تسجيل الدخول المعتمدة ---
 else:
     st.subheader("🔐 تسجيل دخول مشاركي الحديقة")
     login_phone = st.text_input("📱 أدخل رقم جوالك المعتمد للدخول:", max_chars=10)
     
     if login_phone:
         login_phone = str(login_phone).strip()
+        is_found = False
+        user_name = ""
         
-        # للبدء السريع والتسهيل على الشباب، السستم سيعتبره مسجلاً إذا كتب بياناته
-        df_users["الجوال"] = df_users["الجوال"].astype(str).str.strip()
-        user_row = df_users[df_users["الجوال"] == login_phone]
+        if not df_users.empty and "الجوال" in df_users.columns:
+            df_users["الجوال"] = df_users["الجوال"].astype(str).str.strip()
+            user_row = df_users[df_users["الجوال"] == login_phone]
+            if not user_row.empty:
+                is_found = True
+                user_name = user_row.iloc[0]["المشارك"]
         
-        # اسم افتراضي في حال كان أول مستخدم يجرب السستم قبل امتلاء الشيت
-        user_name = user_row.iloc[0]["المشارك"] if not user_row.empty else "مشارك الحديقة"
-        
-        st.success(f"مرحباً بعودتك للوحة التحكم! 😎")
-        
-        st.markdown("### 📊 لوحة الصدارة المحدثة لايف")
-        if not df_users.empty and "النقاط" in df_users.columns:
-            df_display = df_users[["المشارك", "النقاط"]].sort_values(by="النقاط", ascending=False)
-            st.dataframe(df_display, hide_index=True, use_container_width=True)
+        if not is_found:
+            st.error("❌ رقم الجوال هذا غير مسجل مسبقاً! يرجى اختيار خيار 'إنشاء حساب جديد' أولاً.")
         else:
-            # لوحة صدارة افتراضية أنيقة حتى يسجل البقية
-            st.dataframe(pd.DataFrame([{"المشارك": "أحمد بادحمان", "النقاط": 0}]), hide_index=True, use_container_width=True)
-        
-        st.markdown("---")
-        st.subheader("🔮 ضع توقعاتك")
-        
-        for match in matches:
-            time_until_match = match["time"] - now_ksa
+            st.success(f"مرحباً بعودتك يا {user_name}! 😎")
             
-            if (timedelta(hours=0) <= time_until_match <= timedelta(hours=48)) or (match["id"] == 1):
-                with st.container():
-                    st.markdown(f"""
-                    <div class="match-card">
-                        <h4 style='color: #1e4620; margin:0;'>{match['desc']}</h4>
-                        <p style='color: #777; font-size:13px; margin:5px 0 0 0;'>📅 موعد اللقاء: {match['time'].strftime('%d يونيو | %I:%M %p')}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    if time_until_match <= timedelta(hours=1):
-                        st.error("🔒 مغلق! انتهى وقت التوقع")
-                    else:
-                        c1, c2 = st.columns(2)
-                        with c1:
-                            h_score = st.number_input("أهداف الأول", 0, 10, key=f"h_{match['id']}")
-                        with c2:
-                            a_score = st.number_input("أهداف الثاني", 0, 10, key=f"a_{match['id']}")
+            st.markdown("### 📊 لوحة الصدارة المحدثة لايف")
+            if not df_users.empty and "النقاط" in df_users.columns:
+                df_display = df_users[["المشارك", "النقاط"]].sort_values(by="النقاط", ascending=False)
+                st.dataframe(df_display, hide_index=True, use_container_width=True)
+            
+            st.markdown("---")
+            st.subheader("🔮 ضع توقعاتك")
+            
+            for match in matches:
+                time_until_match = match["time"] - now_ksa
+                
+                if (timedelta(hours=0) <= time_until_match <= timedelta(hours=48)) or (match["id"] == 1):
+                    with st.container():
+                        st.markdown(f"""
+                        <div class="match-card">
+                            <h4 style='color: #1e4620; margin:0;'>{match['desc']}</h4>
+                            <p style='color: #777; font-size:13px; margin:5px 0 0 0;'>📅 موعد اللقاء: {match['time'].strftime('%d يونيو | %I:%M %p')}</p>
+                        </div>
+                        """, unsafe_allow_html=True)
                         
-                        if st.button(f"اعتماد التوقع للمباراة", key=f"btn_{match['id']}"):
-                            st.success(f"🏁 تم اعتماد توقعك الفريد بنجاح ({h_score} - {a_score}) وحفظه برقم جوالك!")
-                st.markdown("<br>", unsafe_allow_html=True)
+                        if time_until_match <= timedelta(hours=1):
+                            st.error("🔒 مغلق! انتهى وقت التوقع")
+                        else:
+                            c1, c2 = st.columns(2)
+                            with c1:
+                                h_score = st.number_input("أهداف الأول", 0, 10, key=f"h_{match['id']}")
+                            with c2:
+                                a_score = st.number_input("أهداف الثاني", 0, 10, key=f"a_{match['id']}")
+                            
+                            if st.button(f"اعتماد التوقع للمباراة", key=f"btn_{match['id']}"):
+                                new_pred = pd.DataFrame([{"الجوال": login_phone, "المباراة": match["id"], "توقع_1": h_score, "توقع_2": a_score}])
+                                df_preds = pd.concat([df_preds, new_pred], ignore_index=True)
+                                
+                                try:
+                                    conn.update(worksheet="predictions", data=df_preds)
+                                    st.success("تم تسجيل توقعك الفريد بأمان في السيرفر! 🏁")
+                                    st.rerun()
+                                except Exception as e:
+                                    st.error("خطأ أثناء حفظ التوقع. يرجى مراجعة الصلاحيات.")
+                    st.markdown("<br>", unsafe_allow_html=True)
