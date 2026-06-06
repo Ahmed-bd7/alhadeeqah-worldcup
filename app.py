@@ -316,4 +316,17 @@ else:
                         calculated_match_options[f"{m['team_home']} × {m['team_away']}"] = m["id"]
                 
                 if calculated_match_options:
-                    m_to_reset = st.selectbox("إختر مباراة تم
+                    m_to_reset = st.selectbox("إختر مباراة تم حسابها لتريد مسح حسبتها وإعادة تفعيلها:", list(calculated_match_options.keys()))
+                    if st.button("🔄 إعادة تفعيل وحذف قفل الحسبة للمباراة"):
+                        cursor.execute("DELETE FROM processed_matches WHERE match_id = ?", (calculated_match_options[m_to_reset],))
+                        db_conn.commit()
+                        st.success("تم فك قفل المباراة!")
+                        st.rerun()
+                
+                if st.button("🚨 تصفير قاعدة البيانات بالكامل (إعادة ضبط المصنع للبطولة)"):
+                    cursor.execute("DELETE FROM users")
+                    cursor.execute("DELETE FROM predictions")
+                    cursor.execute("DELETE FROM processed_matches")
+                    db_conn.commit()
+                    st.success("تم مسح الداتابيس بالكامل بنجاح؛ السستم الآن فارغ وجاهز للبداية الرسمية من الصفر!")
+                    st.rerun()
