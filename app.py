@@ -33,13 +33,15 @@ st.markdown("""
     <div class="main-title">🌿 بوابـة الحديقة الرقمية الذكية 🏆</div>
     """, unsafe_allow_html=True)
 
-# 2. إنشاء الاتصال التلقائي بـ Google Sheets
+# 2. إنشاء الاتصال التلقائي والمعتمد بـ Google Sheets (تعديل وقراءة)
 conn = st.connection("gsheets", type=GSheetsConnection)
 
 def get_sheet_data(worksheet_name):
     try:
-        return conn.read(spreadsheet=st.secrets["public_gsheet_url"], worksheet=worksheet_name, ttl=0)
-    except:
+        # القراءة باستخدام التوصيل الافتراضي المؤمن المعرف في الـ Secrets
+        return conn.read(worksheet=worksheet_name, ttl=0)
+    except Exception as e:
+        st.error(f"خطأ في قراءة ورقة {worksheet_name}: {e}")
         return pd.DataFrame()
 
 df_users = get_sheet_data("users")
@@ -75,7 +77,6 @@ if choice == "إنشاء حساب جديد (لأول مرة)":
             elif len(new_phone) != 10 or not new_phone.isdigit():
                 st.error("❌ رقم الجوال يجب أن يتكون من 10 أرقام فقط وبدون حروف.")
             else:
-                # الفحص البرمجي الذكي لفرادة الرقم (Unique Check)
                 is_duplicate = False
                 if not df_users.empty and "الجوال" in df_users.columns:
                     df_users["الجوال"] = df_users["الجوال"].astype(str).str.strip()
@@ -83,12 +84,14 @@ if choice == "إنشاء حساب جديد (لأول مرة)":
                         is_duplicate = True
                 
                 if is_duplicate:
-                    st.error(f"⚠️ خطأ: رقم الجوال ({new_phone}) مسجل مسبقاً باسم مشارك آخر في القروب! لا يمكن تكراره.")
+                    st.error(f"⚠️ خطأ: رقم الجوال ({new_phone}) مسجل مسبقاً باسم مشارك آخر في القروب!")
                 else:
-                    # إضافة الحساب الجديد بنجاح لأنه فريد
+                    # إضافة الحساب الجديد
                     new_user_df = pd.DataFrame([{"المشارك": new_name, "النقاط": 0, "الجوال": new_phone}])
                     df_users = pd.concat([df_users, new_user_df], ignore_index=True)
-                    conn.update(spreadsheet=st.secrets["public_gsheet_url"], worksheet="users", data=df_users)
+                    
+                    # الكتابة الآمنة في الجدول بعد تعديل الصلاحيات والمحرك
+                    conn.update(worksheet="users", data=df_users)
                     st.success(f"🎉 كفو يا {new_name}! تم إنشاء حسابك بنجاح. حول الآن إلى شاشة 'تسجيل الدخول' للبدء.")
 
 # --- شاشة تسجيل الدخول المعتادة ---
@@ -113,9 +116,8 @@ else:
         else:
             st.success(f"مرحباً بعودتك يا {user_name}! 😎")
             
-            # عرض لوحة الصدارة
             st.markdown("### 📊 لوحة الصدارة المحدثة لايف")
-            if not df_users.empty:
+            if not df_users.empty and "النقاط" in df_users.columns:
                 df_display = df_users[["المشارك", "النقاط"]].sort_values(by="النقاط", ascending=False)
                 st.dataframe(df_display, hide_index=True, use_container_width=True)
             
@@ -146,6 +148,6 @@ else:
                             if st.button(f"اعتماد التوقع للمباراة", key=f"btn_{match['id']}"):
                                 new_pred = pd.DataFrame([{"الجوال": login_phone, "المباراة": match["id"], "توقع_1": h_score, "توقع_2": a_score}])
                                 df_preds = pd.concat([df_preds, new_pred], ignore_index=True)
-                                conn.update(spreadsheet=st.secrets["public_gsheet_url"], worksheet="predictions", data=df_preds)
+                                conn.update(worksheet="predictions", data=df_preds)
                                 st.success("تم تسجيل توقعك الفريد بأمان في السيرفر! 🏁")
                     st.markdown("<br>", unsafe_allow_html=True)
