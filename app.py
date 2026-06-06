@@ -34,16 +34,15 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # 2. إنشاء الاتصال التلقائي والمعتمد بـ Google Sheets
+# هنا السستم سيقرأ الرابط تلقائياً من [connections.gsheets] ويفتح صلاحية الكتابة بالكامل
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# جلب البيانات باستخدام الرابط المباشر من السيكرتس لتفادي خطأ الـ 400
 @st.cache_data(ttl=0)
 def load_data(sheet_name):
     try:
-        sheet_url = st.secrets["public_gsheet_url"]
-        return conn.read(spreadsheet=sheet_url, worksheet=sheet_name)
+        # القراءة التلقائية بدون تمرير رابط يدوي لمنع خطأ الـ UnsupportedOperation
+        return conn.read(worksheet=sheet_name)
     except Exception as e:
-        # عرض تنبيه مبسط في حال عدم تطابق أسماء التابات بالأسفل
         st.warning(f"⚠️ يرجى التأكد من أن اسم الصفحة أسفل الشيت هو '{sheet_name}' تماماً وبدون مسافات.")
         return pd.DataFrame()
 
@@ -92,9 +91,10 @@ if choice == "إنشاء حساب جديد (لأول مرة)":
                     new_user_df = pd.DataFrame([{"المشارك": new_name, "النقاط": 0, "الجوال": new_phone}])
                     df_users = pd.concat([df_users, new_user_df], ignore_index=True)
                     
-                    # الرفع والتحديث الآمن
-                    conn.update(spreadsheet=st.secrets["public_gsheet_url"], worksheet="users", data=df_users)
+                    # التحديث التلقائي الآمن بدون تمرير رابط في الدالة
+                    conn.update(worksheet="users", data=df_users)
                     st.success(f"🎉 تم إنشاء حسابك بنجاح يا {new_name}! توجه لشاشة تسجيل الدخول.")
+                    st.rerun()
 
 # --- شاشة تسجيل الدخول المعتادة ---
 else:
@@ -150,6 +150,8 @@ else:
                             if st.button(f"اعتماد التوقع للمباراة", key=f"btn_{match['id']}"):
                                 new_pred = pd.DataFrame([{"الجوال": login_phone, "المباراة": match["id"], "توقع_1": h_score, "توقع_2": a_score}])
                                 df_preds = pd.concat([df_preds, new_pred], ignore_index=True)
-                                conn.update(spreadsheet=st.secrets["public_gsheet_url"], worksheet="predictions", data=df_preds)
+                                
+                                # التحديث التلقائي الآمن بدون تمرير رابط في الدالة
+                                conn.update(worksheet="predictions", data=df_preds)
                                 st.success("تم تسجيل توقعك الفريد بأمان في السيرفر! 🏁")
                     st.markdown("<br>", unsafe_allow_html=True)
