@@ -8,7 +8,7 @@ import sqlite3
 ksa_tz = pytz.timezone('Asia/Riyadh')
 now_ksa = datetime.now(ksa_tz)
 
-st.set_page_config(page_title="توقعات الحديقة 2026", page_icon="🌿", layout="centered")
+st.set_page_config(page_title="كينق_الحديقة_المونديال#", page_icon="🌿", layout="centered")
 
 # تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
 st.markdown("""
@@ -38,7 +38,7 @@ st.markdown("""
     }
     .stButton>button:hover { background-color: #1b5e20; border: 1px solid #d4af37; }
     </style>
-    <div class="main-title">🌿 بوابـة الحديقة الرقمية الذكية 🏆</div>
+    <div class="main-title"> تحدي_كينق_الحديقة_المونديال#  🏆</div>
     """, unsafe_allow_html=True)
 
 # 2. إنشاء وإعداد قاعدة البيانات المحلية 
@@ -134,7 +134,7 @@ choice = st.radio("إختر الإجراء:", menu, horizontal=True)
 if choice == "إنشاء حساب جديد (لأول مرة)":
     st.subheader("📝 استمارة تسجيل مشارك جديد")
     with st.form("registration_form"):
-        new_name = st.text_input("👤 الاسم الثنائي الكريم:")
+        new_name = st.text_input("👤 الاسم :")
         new_phone = st.text_input("📱 رقم الجوال (10 أرقام):", max_chars=10)
         new_pass = st.text_input("🔐 اختر كلمة مرور خاصة بحسابك (سرية):", type="password")
         submit_reg = st.form_submit_button("إرسال واعتماد الحساب في الحديقة 🚀")
@@ -223,7 +223,7 @@ else:
                     st.rerun()
 
             st.markdown("---")
-            st.subheader("🔮 وضع توقعاتك الذكية")
+            st.subheader("هنا التحدي يا متحدددي")
             
             for match in all_matches:
                 time_until_match = match["time"] - now_ksa
