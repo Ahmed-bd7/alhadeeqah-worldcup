@@ -3,13 +3,12 @@ from datetime import datetime, timedelta
 import pytz
 import pandas as pd
 import sqlite3
-import requests
 
 # 1. إعداد المنطقة الزمنية وتنسيق الصفحة
 ksa_tz = pytz.timezone('Asia/Riyadh')
 now_ksa = datetime.now(ksa_tz)
 
-st.set_page_config(page_title="توقعات الحديقة 2026", page_icon="🌿", layout="centered")
+st.set_page_config(page_title="كنق المونديال", page_icon="🌿", layout="centered")
 
 # تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
 st.markdown("""
@@ -39,7 +38,7 @@ st.markdown("""
     }
     .stButton>button:hover { background-color: #1b5e20; border: 1px solid #d4af37; }
     </style>
-    <div class="main-title">🌿 بوابـة الحديقة الرقمية الذكية 🏆</div>
+    <div class="main-title"> تحدي_كينق_المونديال#  🏆</div>
     """, unsafe_allow_html=True)
 
 # 2. إنشاء وإعداد قاعدة البيانات المحلية 
@@ -65,14 +64,17 @@ def init_db():
     ''')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS processed_matches (
-            match_id INTEGER PRIMARY KEY
+            match_id INTEGER PRIMARY KEY,
+            actual_home INTEGER,
+            actual_away INTEGER
         )
     ''')
     try:
-        cursor.execute("ALTER TABLE users ADD COLUMN password TEXT DEFAULT '1234'")
+        cursor.execute("ALTER TABLE processed_matches ADD COLUMN actual_home INTEGER")
+        cursor.execute("ALTER TABLE processed_matches ADD COLUMN actual_away INTEGER")
         conn.commit()
     except sqlite3.OperationalError:
-        pass 
+        pass
     return conn
 
 db_conn = init_db()
@@ -80,98 +82,78 @@ db_conn = init_db()
 # رقم أدمن الحديقة الثابت
 ADMIN_PHONE = "0502518301" 
 
-# 🌐 3. إعدادات الـ API والمفتاح الرسمي لكأس العالم 2026
-API_KEY = "3a57379657b569a7a6abe3176fe85b10"
-LEAGUE_ID = 1  
-CURRENT_YEAR = 2026
+# 🗓️ 3. الجدول الكامل للمباريات (مترجم وبتوقيت مكة المكرمة)
+def get_internal_matches():
+    return [
+{"id": 1, "team_home": "المكسيك", "team_away": "جنوب أفريقيا", "time": datetime(2026, 6, 11, 22, 0, tzinfo=ksa_tz)},
+{"id": 2, "team_home": "كوريا الجنوبية", "team_away": "التشيك", "time": datetime(2026, 6, 12, 5, 0, tzinfo=ksa_tz)},
+{"id": 3, "team_home": "كندا", "team_away": "البوسنة والهرسك", "time": datetime(2026, 6, 12, 22, 0, tzinfo=ksa_tz)},
+{"id": 4, "team_home": "الولايات المتحدة", "team_away": "باراغواي", "time": datetime(2026, 6, 13, 4, 0, tzinfo=ksa_tz)},
+{"id": 5, "team_home": "قطر", "team_away": "سويسرا", "time": datetime(2026, 6, 13, 22, 0, tzinfo=ksa_tz)},
+{"id": 6, "team_home": "البرازيل", "team_away": "المغرب", "time": datetime(2026, 6, 14, 1, 0, tzinfo=ksa_tz)},
+{"id": 7, "team_home": "هايتي", "team_away": "اسكتلندا", "time": datetime(2026, 6, 14, 4, 0, tzinfo=ksa_tz)},
+{"id": 8, "team_home": "أستراليا", "team_away": "تركيا", "time": datetime(2026, 6, 14, 7, 0, tzinfo=ksa_tz)},
+{"id": 9, "team_home": "ألمانيا", "team_away": "كوراساو", "time": datetime(2026, 6, 14, 20, 0, tzinfo=ksa_tz)},
+{"id": 10, "team_home": "هولندا", "team_away": "اليابان", "time": datetime(2026, 6, 14, 23, 0, tzinfo=ksa_tz)},
+{"id": 11, "team_home": "ساحل العاج", "team_away": "الإكوادور", "time": datetime(2026, 6, 15, 2, 0, tzinfo=ksa_tz)},
+{"id": 12, "team_home": "السويد", "team_away": "تونس", "time": datetime(2026, 6, 15, 5, 0, tzinfo=ksa_tz)},
+{"id": 13, "team_home": "إسبانيا", "team_away": "الرأس الأخضر", "time": datetime(2026, 6, 15, 19, 0, tzinfo=ksa_tz)},
+{"id": 14, "team_home": "بلجيكا", "team_away": "مصر", "time": datetime(2026, 6, 15, 22, 0, tzinfo=ksa_tz)},
+{"id": 15, "team_home": "السعودية", "team_away": "الأوروغواي", "time": datetime(2026, 6, 16, 1, 0, tzinfo=ksa_tz)},
+{"id": 16, "team_home": "إيران", "team_away": "نيوزيلندا", "time": datetime(2026, 6, 16, 4, 0, tzinfo=ksa_tz)},
+        
+        # --- الجولة الثانية ---
+{"id": 17, "team_home": "فرنسا", "team_away": "السنغال", "time": datetime(2026, 6, 16, 22, 0, tzinfo=ksa_tz)},
+{"id": 18, "team_home": "النرويج", "team_away": "العراق", "time": datetime(2026, 6, 17, 1, 0, tzinfo=ksa_tz)},
 
-# 🔄 دالة جلب المباريات وأتمتة حساب النقاط تلقائياً
-@st.cache_data(ttl=300)  # تحديث ذكي كل 5 دقائق
-def fetch_and_process_matches(api_key, league_id, year):
-    url = "https://v3.football.api-sports.io/fixtures"
-    headers = {
-        'x-rapidapi-key': api_key,
-        'x-rapidapi-host': 'v3.football.api-sports.io'
-    }
-    
-    fetched_matches = []
-    api_success = False
-    
-    for season in [year, year-1, year-2]:
-        try:
-            params = {'league': league_id, 'season': season}
-            response = requests.get(url, headers=headers, params=params, timeout=10)
-            data = response.json()
-            
-            if "response" in data and len(data["response"]) > 0:
-                cursor = db_conn.cursor()
-                
-                for item in data["response"]:
-                    fixture = item["fixture"]
-                    teams = item["teams"]
-                    goals = item["goals"]
-                    
-                    utc_time = datetime.strptime(fixture["date"], "%Y-%m-%dT%H:%M:%S%z")
-                    ksa_time = utc_time.astimezone(ksa_tz)
-                    
-                    match_id = fixture["id"]
-                    status = fixture["status"]["short"]  # حالة المباراة (FT تعني انتهت)
-                    
-                    fetched_matches.append({
-                        "id": match_id,
-                        "team_home": teams["home"]["name"],
-                        "team_away": teams["away"]["name"],
-                        "time": ksa_time,
-                        "status": status,
-                        "goals_home": goals["home"],
-                        "goals_away": goals["away"]
-                    })
-                    
-                    # 🤖 [الأتمتة الذكية]: إذا انتهت المباراة ولم تحسب نقاطها بعد
-                    if status == "FT" and goals["home"] is not None and goals["away"] is not None:
-                        cursor.execute("SELECT match_id FROM processed_matches WHERE match_id = ?", (match_id,))
-                        if not cursor.fetchone():
-                            actual_h = goals["home"]
-                            actual_a = goals["away"]
-                            
-                            # جلب توقعات الشباب لهذه المباراة
-                            cursor.execute("SELECT phone, pred_home, pred_away FROM predictions WHERE match_id = ?", (match_id,))
-                            all_preds = cursor.fetchall()
-                            
-                            for pred in all_preds:
-                                user_phone, p_home, p_away = pred
-                                calculated_points = 0
-                                
-                                # 3 نقاط للتوقع الصحيح بالملي
-                                if p_home == actual_h and p_away == actual_a:
-                                    calculated_points = 3
-                                # نقطة واحدة لتوقع الفائز أو التعادل
-                                elif (p_home > p_away and actual_h > actual_a) or \
-                                     (p_home < p_away and actual_h < actual_a) or \
-                                     (p_home == p_away and actual_h == actual_a):
-                                    calculated_points = 1
-                                    
-                                if calculated_points > 0:
-                                    cursor.execute("UPDATE users SET points = points + ? WHERE phone = ?", (calculated_points, user_phone))
-                            
-                            # قفل المباراة كمعالجة بنجاح
-                            cursor.execute("INSERT INTO processed_matches (match_id) VALUES (?)", (match_id,))
-                            db_conn.commit()
-                            
-                fetched_matches.sort(key=lambda x: x["time"])
-                api_success = True
-                return fetched_matches
-        except Exception as e:
-            continue
-            
-    if not api_success:
-        return [
-            {"id": 901, "team_home": "المكسيك (احتياطي)", "team_away": "جنوب أفريقيا", "time": datetime(2026, 6, 11, 22, 0, tzinfo=ksa_tz), "status": "NS", "goals_home": None, "goals_away": None},
-            {"id": 902, "team_home": "السعودية (احتياطي)", "team_away": "كندا", "time": datetime(2026, 6, 16, 1, 0, tzinfo=ksa_tz), "status": "NS", "goals_home": None, "goals_away": None}
-        ]
+{"id": 19, "team_home": "التشيك", "team_away": "جنوب أفريقيا", "time": datetime(2026, 6, 17, 22, 0, tzinfo=ksa_tz)},
+{"id": 20, "team_home": "المكسيك", "team_away": "كوريا الجنوبية", "time": datetime(2026, 6, 18, 1, 0, tzinfo=ksa_tz)},
+{"id": 21, "team_home": "سويسرا", "team_away": "البوسنة والهرسك", "time": datetime(2026, 6, 18, 4, 0, tzinfo=ksa_tz)},
+{"id": 22, "team_home": "كندا", "team_away": "قطر", "time": datetime(2026, 6, 18, 22, 0, tzinfo=ksa_tz)},
 
-# تشغيل الأتمتة الفورية وحفظ القائمة المحدثة لايف
-matches = fetch_and_process_matches(API_KEY, LEAGUE_ID, CURRENT_YEAR)
+{"id": 23, "team_home": "اسكتلندا", "team_away": "المغرب", "time": datetime(2026, 6, 19, 1, 0, tzinfo=ksa_tz)},
+{"id": 24, "team_home": "البرازيل", "team_away": "هايتي", "time": datetime(2026, 6, 19, 4, 0, tzinfo=ksa_tz)},
+
+{"id": 25, "team_home": "الولايات المتحدة", "team_away": "أستراليا", "time": datetime(2026, 6, 19, 22, 0, tzinfo=ksa_tz)},
+{"id": 26, "team_home": "تركيا", "team_away": "باراغواي", "time": datetime(2026, 6, 20, 1, 0, tzinfo=ksa_tz)},
+
+{"id": 27, "team_home": "ألمانيا", "team_away": "ساحل العاج", "time": datetime(2026, 6, 20, 4, 0, tzinfo=ksa_tz)},
+{"id": 28, "team_home": "الإكوادور", "team_away": "كوراساو", "time": datetime(2026, 6, 20, 22, 0, tzinfo=ksa_tz)},
+
+{"id": 29, "team_home": "هولندا", "team_away": "السويد", "time": datetime(2026, 6, 21, 1, 0, tzinfo=ksa_tz)},
+{"id": 30, "team_home": "تونس", "team_away": "اليابان", "time": datetime(2026, 6, 21, 4, 0, tzinfo=ksa_tz)},
+
+{"id": 31, "team_home": "بلجيكا", "team_away": "إيران", "time": datetime(2026, 6, 21, 22, 0, tzinfo=ksa_tz)},
+{"id": 32, "team_home": "مصر", "team_away": "نيوزيلندا", "time": datetime(2026, 6, 22, 1, 0, tzinfo=ksa_tz)},
+
+        # --- الجولة الثالثة الحاسمة ---
+{"id": 33, "team_home": "إنجلترا", "team_away": "الجزائر", "time": datetime(2026, 6, 22, 4, 0, tzinfo=ksa_tz)},
+{"id": 34, "team_home": "كولومبيا", "team_away": "السعودية", "time": datetime(2026, 6, 22, 22, 0, tzinfo=ksa_tz)},
+
+{"id": 35, "team_home": "الأرجنتين", "team_away": "النمسا", "time": datetime(2026, 6, 23, 1, 0, tzinfo=ksa_tz)},
+{"id": 36, "team_home": "الكاميرون", "team_away": "الإمارات", "time": datetime(2026, 6, 23, 4, 0, tzinfo=ksa_tz)},
+
+{"id": 37, "team_home": "فرنسا", "team_away": "العراق", "time": datetime(2026, 6, 23, 22, 0, tzinfo=ksa_tz)},
+{"id": 38, "team_home": "السنغال", "team_away": "النرويج", "time": datetime(2026, 6, 24, 1, 0, tzinfo=ksa_tz)},
+
+{"id": 39, "team_home": "التشيك", "team_away": "المكسيك", "time": datetime(2026, 6, 24, 4, 0, tzinfo=ksa_tz)},
+{"id": 40, "team_home": "جنوب أفريقيا", "team_away": "كوريا الجنوبية", "time": datetime(2026, 6, 24, 22, 0, tzinfo=ksa_tz)},
+
+{"id": 41, "team_home": "سويسرا", "team_away": "قطر", "time": datetime(2026, 6, 25, 1, 0, tzinfo=ksa_tz)},
+{"id": 42, "team_home": "البوسنة والهرسك", "team_away": "كندا", "time": datetime(2026, 6, 25, 4, 0, tzinfo=ksa_tz)},
+
+{"id": 43, "team_home": "اسكتلندا", "team_away": "البرازيل", "time": datetime(2026, 6, 25, 22, 0, tzinfo=ksa_tz)},
+{"id": 44, "team_home": "المغرب", "team_away": "هايتي", "time": datetime(2026, 6, 26, 1, 0, tzinfo=ksa_tz)},
+
+{"id": 45, "team_home": "الولايات المتحدة", "team_away": "باراغواي", "time": datetime(2026, 6, 26, 4, 0, tzinfo=ksa_tz)},
+{"id": 46, "team_home": "أستراليا", "team_away": "تركيا", "time": datetime(2026, 6, 26, 22, 0, tzinfo=ksa_tz)},
+
+{"id": 47, "team_home": "ألمانيا", "team_away": "الإكوادور", "time": datetime(2026, 6, 27, 1, 0, tzinfo=ksa_tz)},
+{"id": 48, "team_home": "ساحل العاج", "team_away": "كوراساو", "time": datetime(2026, 6, 27, 4, 0, tzinfo=ksa_tz)},
+
+    ]
+
+all_matches = get_internal_matches()
 
 # 4. بوابـة التحكم للمستخدمين
 menu = ["تسجيل الدخول", "إنشاء حساب جديد (لأول مرة)"]
@@ -181,7 +163,7 @@ choice = st.radio("إختر الإجراء:", menu, horizontal=True)
 if choice == "إنشاء حساب جديد (لأول مرة)":
     st.subheader("📝 استمارة تسجيل مشارك جديد")
     with st.form("registration_form"):
-        new_name = st.text_input("👤 الاسم الثنائي الكريم:")
+        new_name = st.text_input("👤 الاسم :")
         new_phone = st.text_input("📱 رقم الجوال (10 أرقام):", max_chars=10)
         new_pass = st.text_input("🔐 اختر كلمة مرور خاصة بحسابك (سرية):", type="password")
         submit_reg = st.form_submit_button("إرسال واعتماد الحساب في الحديقة 🚀")
@@ -256,7 +238,7 @@ else:
                 user_preds = {r[0]: (r[1], r[2]) for r in cursor.fetchall()}
                 
                 review_list = []
-                for m in matches:
+                for m in all_matches:
                     m_desc = f"{m['team_home']} × {m['team_away']}"
                     if m["id"] in user_preds:
                         ph, pa = user_preds[m["id"]]
@@ -270,18 +252,28 @@ else:
                     st.rerun()
 
             st.markdown("---")
-            st.subheader("🔮 وضع توقعاتك الذكية")
+            st.subheader("هنا التحدي يا متحدددي")
             
-            for match in matches:
+            for match in all_matches:
                 time_until_match = match["time"] - now_ksa
                 
-                # إظهار نتيجة المباراة الحقيقية بجانبها إذا كانت انتهت أو تلعب الآن
-                if match["status"] == "FT":
-                    match_desc = f"{match['team_home']} {match['goals_home']} × {match['goals_away']} {match['team_away']} (انتهت ✅)"
+                # فحص حالة المباراة وتفاصيل نتيجتها المخزنة
+                cursor.execute("SELECT actual_home, actual_away FROM processed_matches WHERE match_id = ?", (match["id"],))
+                match_status_row = cursor.fetchone()
+                
+                # التحقق الذكي من أن القيم المسترجعة ليست فارغة
+                if match_status_row and match_status_row[0] is not None and match_status_row[1] is not None:
+                    match_desc = f"{match['team_home']} {match_status_row[0]} × {match_status_row[1]} {match['team_away']} (انتهت واحتُسبت ✅)"
+                    is_calculated_and_valid = True
                 else:
                     match_desc = f"{match['team_home']} × {match['team_away']}"
+                    is_calculated_and_valid = False
                 
-                if (timedelta(minutes=10) <= time_until_match <= timedelta(hours=48)) or (login_phone == ADMIN_PHONE) or (match["status"] == "FT"):
+                # شرط العرض الذكي (خلال 24 ساعة، أو مباريات يوم 11 يونيو، أو الأدمن)
+                is_within_24h = (timedelta(hours=0) <= time_until_match <= timedelta(hours=24))
+                is_june_11 = (match["time"].day == 11 and match["time"].month == 6)
+                
+                if is_within_24h or is_june_11 or is_calculated_and_valid or (login_phone == ADMIN_PHONE):
                     with st.container():
                         st.markdown(f"""
                         <div class="match-card">
@@ -290,8 +282,7 @@ else:
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        # منع التوقع إذا انتهت أو قفل وقتها
-                        if (time_until_match < timedelta(minutes=10) or match["status"] == "FT") and login_phone != ADMIN_PHONE:
+                        if (time_until_match < timedelta(minutes=10) or is_calculated_and_valid) and login_phone != ADMIN_PHONE:
                             st.error("🔒 مغلق! انتهى الوقت القانوني أو المباراة انتهت فعلياً.")
                         else:
                             cursor.execute("SELECT pred_home, pred_away FROM predictions WHERE phone = ? AND match_id = ?", (login_phone, match["id"]))
@@ -314,13 +305,103 @@ else:
                                 db_conn.commit()
                                 st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
             
-            # 🛠️ --- لوحة التحكم الخاصة بأحمد بادحمان (أصبحت خفيفة لإدارة السستم فقط) ---
+            # 🛠️ --- لوحة التحكم المتطورة والآمنة الخاصة بأحمد بادحمان ---
             if login_phone == ADMIN_PHONE:
                 st.markdown("---")
                 st.markdown('<div class="admin-card">⚙️ <b>لوحة تحكم الإدارة الملكية (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
                 
-                st.info("💡 النظام الآن يعمل مؤتمتاً بالكامل. النتائج تُحسب وتُوزع تلقائياً فور نهاية المباريات عبر الـ API.")
+                st.subheader("🧮 إدارة وإدخل نتائج المباريات")
+                match_options = {f"{m['team_home']} × {m['team_away']}": m for m in all_matches}
+                selected_match_str = st.selectbox("إختر المباراة المستهدفة لإدخال/تعديل نتيجتها:", list(match_options.keys()))
+                selected_match = match_options[selected_match_str]
                 
+                cursor.execute("SELECT actual_home, actual_away FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
+                already_calculated = cursor.fetchone()
+                
+                # التحقق أن النتيجة القديمة ليست فارغة لمنع الـ TypeError
+                is_valid_old_result = already_calculated and already_calculated[0] is not None and already_calculated[1] is not None
+                
+                if is_valid_old_result:
+                    st.warning(f"⚠️ هذه المباراة احتُسبت سابقاً بنتيجة: {already_calculated[0]} - {already_calculated[1]}")
+                    
+                    # 🔴 خيار الإلغاء الآمن
+                    if st.button("🚨 إلغاء نتيجة المباراة وسحب النقاط من الأعضاء", key="cancel_btn"):
+                        old_h, old_a = already_calculated
+                        cursor.execute("SELECT phone, pred_home, pred_away FROM predictions WHERE match_id = ?", (selected_match["id"],))
+                        all_preds = cursor.fetchall()
+                        
+                        for pred in all_preds:
+                            user_phone, p_home, p_away = pred
+                            old_points = 0
+                            if p_home == old_h and p_away == old_a:
+                                old_points = 3
+                            elif (p_home > p_away and old_h > old_a) or \
+                                 (p_home < p_away and old_h < old_a) or \
+                                 (p_home == p_away and old_h == old_a):
+                                old_points = 1
+                            
+                            if old_points > 0:
+                                cursor.execute("UPDATE users SET points = MAX(0, points - ?) WHERE phone = ?", (old_points, user_phone))
+                        
+                        cursor.execute("DELETE FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
+                        db_conn.commit()
+                        st.error(f"🔄 تم إلغاء المباراة وسحب النقاط بنجاح! عادت المباراة مفتوحة الآن.")
+                        st.rerun()
+                
+                col_h, col_a = st.columns(2)
+                with col_h:
+                    default_h = already_calculated[0] if is_valid_old_result else 0
+                    actual_h = st.number_input(f"النتيجة الفعلية لـ {selected_match['team_home']}", 0, 10, value=default_h, key="act_h")
+                with col_a:
+                    default_a = already_calculated[1] if is_valid_old_result else 0
+                    actual_a = st.number_input(f"النتيجة الفعلية لـ {selected_match['team_away']}", 0, 10, value=default_a, key="act_a")
+                
+                btn_label = "📝 تحديث وتعديل النقاط الحالية" if is_valid_old_result else "🔥 احسب النقاط وحدث الصدارة فوراً!"
+                
+                if st.button(btn_label):
+                    # إذا كانت النتيجة قديمة وصحيحة، نقوم بخصمها أولاً قبل التحديث الجديد
+                    if is_valid_old_result:
+                        old_h, old_a = already_calculated
+                        cursor.execute("SELECT phone, pred_home, pred_away FROM predictions WHERE match_id = ?", (selected_match["id"],))
+                        all_preds = cursor.fetchall()
+                        for pred in all_preds:
+                            user_phone, p_home, p_away = pred
+                            old_points = 0
+                            if p_home == old_h and p_away == old_a:
+                                old_points = 3
+                            elif (p_home > p_away and old_h > old_a) or \
+                                 (p_home < p_away and old_h < old_a) or \
+                                 (p_home == p_away and old_h == old_a):
+                                old_points = 1
+                            if old_points > 0:
+                                cursor.execute("UPDATE users SET points = MAX(0, points - ?) WHERE phone = ?", (old_points, user_phone))
+                        cursor.execute("DELETE FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
+                    
+                    # احتساب النقاط الجديدة وإضافتها
+                    cursor.execute("SELECT phone, pred_home, pred_away FROM predictions WHERE match_id = ?", (selected_match["id"],))
+                    all_preds = cursor.fetchall()
+                    for pred in all_preds:
+                        user_phone, p_home, p_away = pred
+                        calculated_points = 0
+                        if p_home == actual_h and p_away == actual_a:
+                            calculated_points = 3
+                        elif (p_home > p_away and actual_h > actual_a) or \
+                             (p_home < p_away and actual_h < actual_a) or \
+                             (p_home == p_away and actual_h == actual_a):
+                            calculated_points = 1
+                        if calculated_points > 0:
+                            cursor.execute("UPDATE users SET points = points + ? WHERE phone = ?", (calculated_points, user_phone))
+                    
+                    # حفظ النتيجة الجديدة في الـ Database
+                    cursor.execute('''
+                        INSERT INTO processed_matches (match_id, actual_home, actual_away) 
+                        VALUES (?, ?, ?)
+                        ON CONFLICT(match_id) DO UPDATE SET actual_home=excluded.actual_home, actual_away=excluded.actual_away
+                    ''', (selected_match["id"], actual_h, actual_a))
+                    db_conn.commit()
+                    st.success(f"🏆 تم اعتماد النتيجة ({actual_h} - {actual_a}) وتحديث نقاط الشباب فوراً!")
+                    st.rerun()
+
                 st.subheader("🛠️ شاشة إدارة قاعدة البيانات الفورية")
                 cursor.execute("SELECT name, phone, points, password FROM users")
                 all_users_list = cursor.fetchall()
@@ -348,12 +429,3 @@ else:
                             db_conn.commit()
                             st.error("تم حذف العضو!")
                             st.rerun()
-                
-                st.markdown("---")
-                if st.button("🚨 تصفير قاعدة البيانات بالكامل"):
-                    cursor.execute("DELETE FROM users")
-                    cursor.execute("DELETE FROM predictions")
-                    cursor.execute("DELETE協會 FROM processed_matches")
-                    db_conn.commit()
-                    st.success("تم تصفير السستم بالكامل!")
-                    st.rerun()
