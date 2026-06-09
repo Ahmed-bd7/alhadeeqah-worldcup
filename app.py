@@ -8,7 +8,7 @@ import sqlite3
 ksa_tz = pytz.timezone('Asia/Riyadh')
 now_ksa = datetime.now(ksa_tz)
 
-st.set_page_config(page_title="كينق_الحديقة_المونديال#", page_icon="🌿", layout="centered")
+st.set_page_config(page_title="كنق المونديال", page_icon="🌿", layout="centered")
 
 # تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
 st.markdown("""
