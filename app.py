@@ -38,7 +38,7 @@ st.markdown("""
     }
     .stButton>button:hover { background-color: #1b5e20; border: 1px solid #d4af37; }
     </style>
-    <div class="main-title"> تحدي_كينق_الحديقة_المونديال#  🏆</div>
+    <div class="main-title"> تحدي_كينق_المونديال#  🏆</div>
     """, unsafe_allow_html=True)
 
 # 2. إنشاء وإعداد قاعدة البيانات المحلية 
