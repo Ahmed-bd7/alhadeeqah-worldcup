@@ -84,7 +84,7 @@ padding:25px;
 """, unsafe_allow_html=True)
 st.markdown("""
 <div class="main-title">
- تحدي كنق المونديال ⚽
+ تحدي كنق المونديال 
 </div>
 """, unsafe_allow_html=True)
 
