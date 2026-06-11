@@ -82,7 +82,7 @@ padding:25px;
 
 st.markdown("""
 <div class="main-title">
-🏆 KING WC 26 ⚽
+⚽🏆 WC26 KING
 </div>
 """, unsafe_allow_html=True)
 
