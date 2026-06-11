@@ -12,62 +12,73 @@ now_ksa = datetime.now(ksa_tz)
 st.set_page_config(page_title="كنق_المونديال", page_icon="🤩", layout="centered")
 
 # تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
+# Design V2 فقط
+# استبدل CSS القديم بهذا
+
 st.markdown("""
 <style>
-
-.stApp {
-    background:
-    radial-gradient(circle at top, #123524, #06140d);
+.stApp{
+background:radial-gradient(circle at top,#14532d,#020806);
 }
 
-.main-title {
-    color:#FFD700 !important;
-    text-align:center;
-    font-size:45px;
-    font-weight:900;
-    padding:25px;
-    border-radius:25px;
-    background:rgba(255,255,255,.08);
-    backdrop-filter:blur(12px);
-    box-shadow:0 0 30px rgba(255,215,0,.25);
+.main-title{
+color:#FFD700 !important;
+text-align:center;
+font-size:48px;
+font-weight:900;
+padding:25px;
+border-radius:30px;
+background:rgba(255,215,0,.15);
+box-shadow:0 0 35px rgba(255,215,0,.25);
 }
 
-.match-card {
-    background:linear-gradient(135deg,
-    rgba(255,255,255,.15),
-    rgba(255,255,255,.04));
-    border-radius:25px;
-    padding:25px;
-    margin:20px 0;
-    border:1px solid rgba(255,255,255,.25);
-    box-shadow:0 12px 35px rgba(0,0,0,.35);
+.stApp,p,label,div{
+color:white;
 }
 
-.admin-card {
-    background:linear-gradient(135deg,#5b3200,#b8860b);
-    border-radius:20px;
-    padding:20px;
+.match-card{
+background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
+border-radius:30px;
+padding:25px;
+margin:20px 0;
+border:1px solid rgba(255,255,255,.2);
+box-shadow:0 15px 40px rgba(0,0,0,.45);
 }
 
-.review-card {
-    background:linear-gradient(135deg,#004d2b,#00a85a);
-    border-radius:20px;
-    padding:20px;
+.match-card h4{
+color:#FFD700 !important;
+text-align:center;
+font-size:26px;
 }
 
-.stButton button {
-    background:linear-gradient(90deg,#00c853,#00e676);
-    color:white;
-    border-radius:15px;
-    height:45px;
-    font-weight:bold;
-    border:none;
+.stButton button{
+width:100%;
+height:48px;
+border-radius:18px;
+border:none;
+background:linear-gradient(90deg,#00c853,#00e676);
+color:white;
+font-weight:bold;
 }
 
-.stButton button:hover {
-    background:linear-gradient(90deg,#FFD700,#ff9800);
-    color:black;
+.stButton button:hover{
+background:linear-gradient(90deg,#FFD700,#ff9800);
+color:black;
 }
+
+.admin-card{
+background:linear-gradient(135deg,#5b3200,#b8860b);
+border-radius:25px;
+padding:25px;
+}
+
+.review-card{
+background:linear-gradient(135deg,#004d2b,#00a85a);
+border-radius:25px;
+padding:25px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 </style>
 """, unsafe_allow_html=True)
