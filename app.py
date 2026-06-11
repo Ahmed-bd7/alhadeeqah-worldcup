@@ -358,7 +358,14 @@ else:
                         <h4 style='color: #1e4620; margin:0;'>{match_desc}</h4>
                         <p style='color: #777; font-size:13px; margin:5px 0 0 0;'> موعد اللقاء: {match['time'].strftime('%d يونيو | %I:%M %p')}</p>
                     </div>
-                    "", unsafe_allow_html=True)
+                   st.markdown(f"""
+<div class="match-card">
+    <h4>{match_desc}</h4>
+    <p>
+        موعد اللقاء: {match['time'].strftime('%d يونيو | %I:%M %p')}
+    </p>
+</div>
+""", unsafe_allow_html=True)
                     
                     if (time_until_match < timedelta(minutes=10) or is_calculated_and_valid) and login_phone != ADMIN_PHONE:
                         st.error("🔒 مغلق! انتهى الوقت القانوني أو المباراة انتهت فعلياً.")
