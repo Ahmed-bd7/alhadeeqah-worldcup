@@ -311,7 +311,7 @@ else:
         if f"view_predictions_for" in st.session_state:
             target_phone = st.session_state[f"view_predictions_for"]
             target_name = st.session_state[f"view_predictions_name"]
-            st.markdown(f"""<div class="review-card">🔍 <b>كشف توقعات المشارك: {target_name}</b></div>""", unsafe_allow_html=True)
+            st.markdown(f"""<div class="review-card"> <b>كشف توقعات المشارك: {target_name}</b></div>""", unsafe_allow_html=True)
             
             cursor.execute("SELECT match_id, pred_home, pred_away FROM predictions WHERE phone = ?", (target_phone,))
             user_preds = {r[0]: (r[1], r[2]) for r in cursor.fetchall()}
