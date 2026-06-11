@@ -12,32 +12,64 @@ st.set_page_config(page_title="كنق_المونديال", page_icon="🤩", lay
 
 # تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
 st.markdown("""
-    <style>
-    .stApp { background-color: #f4f9f4; }
-    .main-title {
-        color: #1e4620; text-align: center; font-family: 'Arial', sans-serif;
-        font-size: 36px; font-weight: bold; border-bottom: 3px solid #d4af37;
-        padding-bottom: 10px; margin-bottom: 30px;
-    }
-    .match-card {
-        background-color: #ffffff; border-radius: 15px; padding: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-right: 10px solid #2e7d32;
-        margin-bottom: 25px;
-    }
-    .admin-card {
-        background-color: #fff3cd; border-radius: 15px; padding: 20px;
-        border-right: 10px solid #ffc107; margin-top: 30px; margin-bottom: 20px;
-    }
-    .review-card {
-        background-color: #e8f5e9; border-radius: 15px; padding: 20px;
-        border-right: 10px solid #00c853; margin-top: 20px; margin-bottom: 20px;
-    }
-    .stButton>button {
-        background-color: #2e7d32; color: white; border-radius: 10px;
-        width: 100%; font-weight: bold; height: 40px; border: none;
-    }
-    .stButton>button:hover { background-color: #1b5e20; border: 1px solid #d4af37; }
-    </style>
+<style>
+
+.stApp {
+    background:
+    radial-gradient(circle at top, #123524, #06140d);
+}
+
+.main-title {
+    color:#FFD700 !important;
+    text-align:center;
+    font-size:45px;
+    font-weight:900;
+    padding:25px;
+    border-radius:25px;
+    background:rgba(255,255,255,.08);
+    backdrop-filter:blur(12px);
+    box-shadow:0 0 30px rgba(255,215,0,.25);
+}
+
+.match-card {
+    background:linear-gradient(135deg,
+    rgba(255,255,255,.15),
+    rgba(255,255,255,.04));
+    border-radius:25px;
+    padding:25px;
+    margin:20px 0;
+    border:1px solid rgba(255,255,255,.25);
+    box-shadow:0 12px 35px rgba(0,0,0,.35);
+}
+
+.admin-card {
+    background:linear-gradient(135deg,#5b3200,#b8860b);
+    border-radius:20px;
+    padding:20px;
+}
+
+.review-card {
+    background:linear-gradient(135deg,#004d2b,#00a85a);
+    border-radius:20px;
+    padding:20px;
+}
+
+.stButton button {
+    background:linear-gradient(90deg,#00c853,#00e676);
+    color:white;
+    border-radius:15px;
+    height:45px;
+    font-weight:bold;
+    border:none;
+}
+
+.stButton button:hover {
+    background:linear-gradient(90deg,#FFD700,#ff9800);
+    color:black;
+}
+
+</style>
+""", unsafe_allow_html=True)
     <div class="main-title"> 🏆 تحدي_كنق_المونديال# </div>
     """, unsafe_allow_html=True)
 
