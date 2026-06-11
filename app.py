@@ -82,7 +82,7 @@ padding:25px;
 
 st.markdown("""
 <div class="main-title">
-🏆 تحدي كنق المونديال ⚽
+🏆 KING WC 26 ⚽
 </div>
 """, unsafe_allow_html=True)
 
