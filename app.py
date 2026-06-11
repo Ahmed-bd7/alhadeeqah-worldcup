@@ -70,8 +70,11 @@ st.markdown("""
 
 </style>
 """, unsafe_allow_html=True)
-    <div class="main-title"> 🏆 تحدي_كنق_المونديال# </div>
-    """, unsafe_allow_html=True)
+st.markdown("""
+<div class="main-title">
+🏆 تحدي كنق المونديال ⚽
+</div>
+""", unsafe_allow_html=True)    """, unsafe_allow_html=True)
 
 # 2. إنشاء وإعداد قاعدة البيانات المحلية 
 def init_db():
