@@ -20,58 +20,32 @@ st.markdown("""
 }
 
 .main-title {
-    color:#FFD700 !important;
+    color:#FFD700;
     text-align:center;
     font-size:45px;
     font-weight:900;
     padding:25px;
-    border-radius:25px;
-    background:rgba(255,255,255,.08);
-    backdrop-filter:blur(12px);
-    box-shadow:0 0 30px rgba(255,215,0,.25);
 }
 
 .match-card {
-    background:linear-gradient(135deg,
-    rgba(255,255,255,.15),
-    rgba(255,255,255,.04));
+    background:rgba(255,255,255,.1);
     border-radius:25px;
     padding:25px;
-    margin:20px 0;
-    border:1px solid rgba(255,255,255,.25);
-    box-shadow:0 12px 35px rgba(0,0,0,.35);
-}
-
-.admin-card {
-    background:linear-gradient(135deg,#5b3200,#b8860b);
-    border-radius:20px;
-    padding:20px;
-}
-
-.review-card {
-    background:linear-gradient(135deg,#004d2b,#00a85a);
-    border-radius:20px;
-    padding:20px;
 }
 
 .stButton button {
-    background:linear-gradient(90deg,#00c853,#00e676);
+    background:#00c853;
     color:white;
     border-radius:15px;
-    height:45px;
-    font-weight:bold;
-    border:none;
-}
-
-.stButton button:hover {
-    background:linear-gradient(90deg,#FFD700,#ff9800);
-    color:black;
 }
 
 </style>
+
+<div class="main-title">
+🏆 تحدي كنق المونديال ⚽
+</div>
+
 """, unsafe_allow_html=True)
-    <div class="main-title"> 🏆 تحدي_كنق_المونديال# </div>
-    """, unsafe_allow_html=True)
 
 # 2. إنشاء وإعداد قاعدة البيانات المحلية 
 def init_db():
