@@ -363,7 +363,6 @@ else:
                 del st.session_state[f"view_predictions_for"]
                 st.rerun()
 
----
 with tab_schedule:
     st.subheader("📅 مواعيد فتح التوقعات")
 
