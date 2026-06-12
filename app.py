@@ -341,7 +341,7 @@ else:
 
     # --- تبويب إدخال التوقعات للمباريات ---
     with tab_predict:
-        st.subheader("هنا التحدي يا متحدددي ⚽")
+        st.subheader("⚽️⚒️ هنا التحدي يا متحدددي ")
         cursor = db_conn.cursor()
         
         for match in all_matches:
@@ -372,7 +372,7 @@ else:
                     """, unsafe_allow_html=True)
 
                     if (time_until_match < timedelta(minutes=10) or is_calculated_and_valid) and login_phone != ADMIN_PHONE:
-                        st.error("🔒 مغلق! انتهى الوقت القانوني أو المباراة انتهت فعلياً.")
+                        st.error("🔒 مغلق! انتهى وقت التوقع أو المباراة انتهت فعلياً.")
                     else:
                         cursor.execute("SELECT pred_home, pred_away FROM predictions WHERE phone = ? AND match_id = ?", (login_phone, match["id"]))
                         existing_pred = cursor.fetchone()
