@@ -130,7 +130,7 @@ ADMIN_PHONE = "0502518301"
 # 🗓️ 3. الجدول الكامل للمباريات (مترجم وبتوقيت مكة المكرمة)
 def get_internal_matches():
     return [
-        {"id": 1, "team_home": "🇲🇽المكسيك", "team_away": "🇿🇦جنوب أفريقيا", "time": datetime(2026, 6, 11, 22, 0, tzinfo=ksa_tz)},
+        {"id": 1, "team_home": "المكسيك", "team_away": "جنوب أفريقيا", "time": datetime(2026, 6, 11, 22, 0, tzinfo=ksa_tz)},
 {"id": 2, "team_home": "كوريا الجنوبية", "team_away": "التشيك", "time": datetime(2026, 6, 12, 5, 0, tzinfo=ksa_tz)},
 {"id": 3, "team_home": "كندا", "team_away": "البوسنة والهرسك", "time": datetime(2026, 6, 12, 22, 0, tzinfo=ksa_tz)},
 {"id": 4, "team_home": "الولايات المتحدة", "team_away": "باراغواي", "time": datetime(2026, 6, 13, 4, 0, tzinfo=ksa_tz)},
