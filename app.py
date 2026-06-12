@@ -306,20 +306,21 @@ else:
         st.rerun()
 
     # إنشاء التبويبات للمحتوى الفعلي للبطولة
-    if login_phone == ADMIN_PHONE:
-        tab_leaderboard, tab_predict, tab_schedule, tab_admin = st.tabs([
-    "🏆🔥جدول الترتيب",
-    "🤩التوقعات الحالية",
-    "📅 مواعيد فتح التوقعات",
-    "⚙️ الإدارة"
-])
-    else:
-        tab_leaderboard, tab_predict, tab_schedule = st.tabs([
-    "🏆🔥جدول الترتيب",
-    "🤩 التوقعات الحالية",
-    "📅 مواعيد فتح التوقعات"
-])
-    # --- مواعيد فتح التوقعات ---
+if login_phone == ADMIN_PHONE:
+    tab_leaderboard, tab_predict, tab_schedule, tab_admin = st.tabs([
+        "🏆🔥جدول الترتيب",
+        "🤩التوقعات الحالية",
+        "📅 مواعيد فتح التوقعات",
+        "⚙️ الإدارة"
+    ])
+else:
+    tab_leaderboard, tab_predict, tab_schedule = st.tabs([
+        "🏆🔥جدول الترتيب",
+        "🤩 التوقعات الحالية",
+        "📅 مواعيد فتح التوقعات"
+    ])
+
+# --- مواعيد فتح التوقعات ---
 with tab_schedule:
     st.subheader("📅 مواعيد فتح التوقعات")
 
