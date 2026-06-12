@@ -292,7 +292,7 @@ else:
 
     # إنشاء التبويبات للمحتوى الفعلي للبطولة
     if login_phone == ADMIN_PHONE:
-        tab_leaderboard, tab_predict, tab_admin = st.tabs(["جدول الترتيب 🏆🔥", "🤩التوقعات الحالية", "⚙️ الإدارة "])
+        tab_leaderboard, tab_predict, tab_admin = st.tabs(["🏆🔥جدول الترتيب", "🤩التوقعات الحالية", "⚙️ الإدارة "])
     else:
         tab_leaderboard, tab_predict = st.tabs(["🏆🔥جدول الترتيب", " 🤩 التوقعات الحالية"])
 
