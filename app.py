@@ -311,7 +311,7 @@ else:
             with col_name:
                 st.markdown(f"{p_name}")
             with col_pts:
-                st.markdown(f"🏆 {p_points} ن")
+                st.markdown(f"🏆 {p_points} Points")
             with col_action:
                 if st.button(f"مشاهدة التوقعات", key=f"rev_{p_phone}_{idx}"):
                     st.session_state[f"view_predictions_for"] = p_phone
