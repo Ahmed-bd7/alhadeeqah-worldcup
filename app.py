@@ -294,7 +294,7 @@ else:
     if login_phone == ADMIN_PHONE:
         tab_leaderboard, tab_predict, tab_admin = st.tabs(["جدول الترتيب 🏆", "التوقعات الحالية🤩", "⚙️ الإدارة "])
     else:
-        tab_leaderboard, tab_predict = st.tabs(["🤩جدول الترتيب 🏆", "التوقعات الحالية"])
+        tab_leaderboard, tab_predict = st.tabs(["جدول الترتيب 🏆", " 🤩 التوقعات الحالية"])
 
     # --- تبويب لوحة الصدارة ---
     with tab_leaderboard:
