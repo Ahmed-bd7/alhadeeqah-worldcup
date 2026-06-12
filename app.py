@@ -292,13 +292,13 @@ else:
 
     # إنشاء التبويبات للمحتوى الفعلي للبطولة
     if login_phone == ADMIN_PHONE:
-        tab_leaderboard, tab_predict, tab_admin = st.tabs(["جدول الترتيب 🏆", "التوقعات الحالية🤩", "⚙️ الإدارة "])
+        tab_leaderboard, tab_predict, tab_admin = st.tabs(["جدول الترتيب 🏆🔥", "🤩التوقعات الحالية", "⚙️ الإدارة "])
     else:
-        tab_leaderboard, tab_predict = st.tabs(["جدول الترتيب 🏆", " 🤩 التوقعات الحالية"])
+        tab_leaderboard, tab_predict = st.tabs(["جدول التريب 🏆🔥", " 🤩 التوقعات الحالية"])
 
     # --- تبويب لوحة الصدارة ---
     with tab_leaderboard:
-        st.markdown("### 📊 جدول الترتيب لايف")
+        st.markdown("### 🤩🏆 جدول الترتيب لايف")
         cursor = db_conn.cursor()
         cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
         leaderboard_data = cursor.fetchall()
