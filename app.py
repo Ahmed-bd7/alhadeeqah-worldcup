@@ -320,40 +320,6 @@ else:
         "📅 مواعيد فتح التوقعات"
     ])
 
-# --- مواعيد فتح التوقعات ---
-with tab_schedule:
-    st.subheader("📅 مواعيد فتح التوقعات")
-
-    rows = []
-
-    for match in all_matches:
-
-        open_time = match["time"] - timedelta(hours=24)
-
-        if now_ksa >= open_time:
-            status = "🟢 مفتوح الآن"
-        else:
-            remaining = open_time - now_ksa
-
-            days = remaining.days
-            hours = remaining.seconds // 3600
-
-            status = f"🟡 بعد {days} يوم و {hours} ساعة"
-
-        rows.append({
-            "المباراة": f"{match['team_home']} × {match['team_away']}",
-            "فتح التوقعات": open_time.strftime("%d/%m %I:%M %p"),
-            "موعد المباراة": match["time"].strftime("%d/%m %I:%M %p"),
-            "الحالة": status
-        })
-
-    df = pd.DataFrame(rows)
-
-    st.dataframe(
-        df,
-        use_container_width=True,
-        hide_index=True
-    )
     # --- تبويب لوحة الصدارة ---
     with tab_leaderboard:
         st.markdown("### 🤩🏆 جدول الترتيب لايف")
@@ -397,6 +363,40 @@ with tab_schedule:
                 del st.session_state[f"view_predictions_for"]
                 st.rerun()
 
+---
+with tab_schedule:
+    st.subheader("📅 مواعيد فتح التوقعات")
+
+    rows = []
+
+    for match in all_matches:
+
+        open_time = match["time"] - timedelta(hours=24)
+
+        if now_ksa >= open_time:
+            status = "🟢 مفتوح الآن"
+        else:
+            remaining = open_time - now_ksa
+
+            days = remaining.days
+            hours = remaining.seconds // 3600
+
+            status = f"🟡 بعد {days} يوم و {hours} ساعة"
+
+        rows.append({
+            "المباراة": f"{match['team_home']} × {match['team_away']}",
+            "فتح التوقعات": open_time.strftime("%d/%m %I:%M %p"),
+            "موعد المباراة": match["time"].strftime("%d/%m %I:%M %p"),
+            "الحالة": status
+        })
+
+    df = pd.DataFrame(rows)
+
+    st.dataframe(
+        df,
+        use_container_width=True,
+        hide_index=True
+    )
     # --- تبويب إدخال التوقعات للمباريات ---
     with tab_predict:
         st.subheader("⚽️⚒️ هنا التحدي يا متحدددي ")
