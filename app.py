@@ -367,8 +367,8 @@ else:
     with tab_predict:
         st.subheader("⚽️⚒️ هنا التحدي يا متحدددي ")
 
-        show_closed = st.toggle(
-            "🔴⌛️عرض المباريات المنتهية",
+        hide_closed = st.toggle(
+            "🔴 إخفاء المباريات المنتهية",
             value=False
         )
 
@@ -377,7 +377,8 @@ else:
         for match in all_matches:
             time_until_match = match["time"] - now_ksa
 
-            if not show_closed and time_until_match < timedelta(minutes=10):
+            # إخفاء المباريات المنتهية عند تفعيل الخيار
+            if hide_closed and now_ksa >= match["time"]:
                 continue
             
             cursor.execute("SELECT actual_home, actual_away FROM processed_matches WHERE match_id = ?", (match["id"],))
