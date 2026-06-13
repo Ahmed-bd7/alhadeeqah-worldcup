@@ -124,6 +124,21 @@ def init_db():
 
 db_conn = init_db()
 
+
+FLAGS = {
+    "السعودية":"🇸🇦","الأرجنتين":"🇦🇷","البرازيل":"🇧🇷","فرنسا":"🇫🇷","ألمانيا":"🇩🇪",
+    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴","اسكتلندا":"🏴","المغرب":"🇲🇦",
+    "الجزائر":"🇩🇿","تونس":"🇹🇳","مصر":"🇪🇬","قطر":"🇶🇦","المكسيك":"🇲🇽",
+    "الولايات المتحدة":"🇺🇸","كندا":"🇨🇦","أستراليا":"🇦🇺","تركيا":"🇹🇷","سويسرا":"🇨🇭",
+    "التشيك":"🇨🇿","كوريا الجنوبية":"🇰🇷","باراغواي":"🇵🇾","هايتي":"🇭🇹","أوروغواي":"🇺🇾",
+    "الأوروغواي":"🇺🇾","أوزبكستان":"🇺🇿","إيران":"🇮🇷","الأردن":"🇯🇴","الإكوادور":"🇪🇨",
+    "البوسنة والهرسك":"🇧🇦","الرأس الأخضر":"🇨🇻","السنغال":"🇸🇳","السويد":"🇸🇪","العراق":"🇮🇶",
+    "الكونغو الديمقراطية":"🇨🇩","النرويج":"🇳🇴","النمسا":"🇦🇹","اليابان":"🇯🇵","بلجيكا":"🇧🇪",
+    "بنما":"🇵🇦","جنوب أفريقيا":"🇿🇦","ساحل العاج":"🇨🇮","غانا":"🇬🇭","كرواتيا":"🇭🇷",
+    "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
+}
+
+
 # رقم أدمن الحديقة الثابت
 ADMIN_PHONE = "0502518301" 
 
@@ -384,11 +399,14 @@ else:
             cursor.execute("SELECT actual_home, actual_away FROM processed_matches WHERE match_id = ?", (match["id"],))
             match_status_row = cursor.fetchone()
             
+            home_flag = FLAGS.get(match['team_home'], '🏳️')
+            away_flag = FLAGS.get(match['team_away'], '🏳️')
+
             if match_status_row and match_status_row[0] is not None and match_status_row[1] is not None:
-                match_desc = f"{match['team_home']} {match_status_row[0]} × {match_status_row[1]} {match['team_away']} (انتهت واحتُسبت ✅)"
+                match_desc = f"{home_flag} {match['team_home']} {match_status_row[0]} × {match_status_row[1]} {away_flag} {match['team_away']} (انتهت واحتُسبت ✅)"
                 is_calculated_and_valid = True
             else:
-                match_desc = f"{match['team_home']} × {match['team_away']}"
+                match_desc = f"{home_flag} {match['team_home']} × {away_flag} {match['team_away']}"
                 is_calculated_and_valid = False
             
             is_within_24h = (timedelta(hours=0) <= time_until_match <= timedelta(hours=24))
