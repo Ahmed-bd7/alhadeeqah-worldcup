@@ -427,13 +427,17 @@ else:
         for match in all_matches:
             open_time = match["time"] - timedelta(hours=24)
 
-            if now_ksa >= open_time:
-                status = "🟢 مفتوح الآن"
-            else:
-                remaining = open_time - now_ksa
-                days = remaining.days
-                hours = remaining.seconds // 3600
-                status = f"🟡 بعد {days} يوم و {hours} ساعة"
+            if now_ksa >= match["time"]:
+    status = "🔴 مغلق"
+
+elif now_ksa >= open_time:
+    status = "🟢 مفتوح الآن"
+
+else:
+    remaining = open_time - now_ksa
+    days = remaining.days
+    hours = remaining.seconds // 3600
+    status = f"🟡 بعد {days} يوم و {hours} ساعة"
 
             rows.append({
                 "المباراة": f"{match['team_home']} × {match['team_away']}",
