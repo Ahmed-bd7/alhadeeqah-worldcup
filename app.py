@@ -307,18 +307,19 @@ else:
 
     # إنشاء التبويبات للمحتوى الفعلي للبطولة
     if login_phone == ADMIN_PHONE:
-    tab_leaderboard,tab_predict,tab_schedule,tab_admin = st.tabs([
-        "🏆🔥جدول الترتيب",
-        "🤩التوقعات الحالية",
-        "📅 مواعيد فتح التوقعات",
-        "⚙️ الإدارة"
-    ])
-else:
-    tab_leaderboard,tab_predict,tab_schedule = st.tabs([
-        "🏆🔥جدول الترتيب",
-        "🤩التوقعات الحالية",
-        "📅 مواعيد فتح التوقعات"
-    ])
+        tab_leaderboard, tab_predict, tab_schedule, tab_admin = st.tabs([
+            "🏆🔥جدول الترتيب",
+            "🤩التوقعات الحالية",
+            "📅 مواعيد فتح التوقعات",
+            "⚙️ الإدارة"
+        ])
+    else:
+        tab_leaderboard, tab_predict, tab_schedule = st.tabs([
+            "🏆🔥جدول الترتيب",
+            "🤩التوقعات الحالية",
+            "📅 مواعيد فتح التوقعات"
+        ])
+
     # --- تبويب لوحة الصدارة ---
     with tab_leaderboard:
         st.markdown("### 🤩🏆 جدول الترتيب لايف")
@@ -416,34 +417,37 @@ else:
                             ''', (login_phone, match["id"], h_score, a_score))
                             db_conn.commit()
                             st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
-with tab_schedule:
-    st.subheader("📅 مواعيد فتح التوقعات")
 
-    rows = []
 
-    for match in all_matches:
-        open_time = match["time"] - timedelta(hours=24)
+    with tab_schedule:
+        st.subheader("📅 مواعيد فتح التوقعات")
 
-        if now_ksa >= open_time:
-            status = "🟢 مفتوح الآن"
-        else:
-            remaining = open_time - now_ksa
-            days = remaining.days
-            hours = remaining.seconds // 3600
-            status = f"🟡 بعد {days} يوم و {hours} ساعة"
+        rows = []
 
-        rows.append({
-            "المباراة": f"{match['team_home']} × {match['team_away']}",
-            "فتح التوقعات": open_time.strftime("%d/%m %I:%M %p"),
-            "موعد المباراة": match["time"].strftime("%d/%m %I:%M %p"),
-            "الحالة": status
-        })
+        for match in all_matches:
+            open_time = match["time"] - timedelta(hours=24)
 
-    st.dataframe(
-        pd.DataFrame(rows),
-        hide_index=True,
-        use_container_width=True
-    )
+            if now_ksa >= open_time:
+                status = "🟢 مفتوح الآن"
+            else:
+                remaining = open_time - now_ksa
+                days = remaining.days
+                hours = remaining.seconds // 3600
+                status = f"🟡 بعد {days} يوم و {hours} ساعة"
+
+            rows.append({
+                "المباراة": f"{match['team_home']} × {match['team_away']}",
+                "فتح التوقعات": open_time.strftime("%d/%m %I:%M %p"),
+                "موعد المباراة": match["time"].strftime("%d/%m %I:%M %p"),
+                "الحالة": status
+            })
+
+        st.dataframe(
+            pd.DataFrame(rows),
+            hide_index=True,
+            use_container_width=True
+        )
+
     # --- تبويب الإدارة والتحكم (يظهر للأدمن فقط) ---
     if login_phone == ADMIN_PHONE:
         with tab_admin:
