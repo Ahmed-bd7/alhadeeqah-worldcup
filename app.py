@@ -13,7 +13,7 @@ st.set_page_config(page_title="⚽🏆 WC26 KING", page_icon="", layout="centere
 
 FLAGS = {
     "السعودية":"🇸🇦","الأرجنتين":"🇦🇷","البرازيل":"🇧🇷","فرنسا":"🇫🇷","ألمانيا":"🇩🇪",
-    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","اسكتلندا":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","المغرب":"🇲🇦",
+    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴","اسكتلندا":"🏴","المغرب":"🇲🇦",
     "الجزائر":"🇩🇿","تونس":"🇹🇳","مصر":"🇪🇬","قطر":"🇶🇦","المكسيك":"🇲🇽",
     "الولايات المتحدة":"🇺🇸","كندا":"🇨🇦","أستراليا":"🇦🇺","تركيا":"🇹🇷","سويسرا":"🇨🇭",
     "التشيك":"🇨🇿","كوريا الجنوبية":"🇰🇷","باراغواي":"🇵🇾","هايتي":"🇭🇹","أوروغواي":"🇺🇾",
@@ -175,7 +175,7 @@ def get_internal_matches():
 {"id": 26, "team_home": "سويسرا", "team_away": "البوسنة والهرسك", "time": datetime(2026, 6, 18, 22, 0, tzinfo=ksa_tz)},
 {"id": 27, "team_home": "كندا", "team_away": "قطر", "time": datetime(2026, 6, 19, 1, 0, tzinfo=ksa_tz)},
 {"id": 28, "team_home": "المكسيك", "team_away": "كوريا الجنوبية", "time": datetime(2026, 6, 19, 4, 0, tzinfo=ksa_tz)},
-{"id": 29, "team_home": "الولايات المتحدة", "team_away": "أستراليا", "time": datetime(2026, 6, 19, 22, 0, tzinfo=ksa_tz)},
+{"id": 29, "team_home": "أمريكا", "team_away": "أستراليا", "time": datetime(2026, 6, 19, 22, 0, tzinfo=ksa_tz)},
 {"id": 30, "team_home": "اسكتلندا", "team_away": "المغرب", "time": datetime(2026, 6, 20, 1, 0, tzinfo=ksa_tz)},
 {"id": 31, "team_home": "البرازيل", "team_away": "هايتي", "time": datetime(2026, 6, 20, 3, 30, tzinfo=ksa_tz)},
 {"id": 32, "team_home": "تركيا", "team_away": "باراغواي", "time": datetime(2026, 6, 20, 6, 0, tzinfo=ksa_tz)},
@@ -209,7 +209,7 @@ def get_internal_matches():
 {"id": 57, "team_home": "اليابان", "team_away": "السويد", "time": datetime(2026, 6, 26, 2, 0, tzinfo=ksa_tz)},
 {"id": 58, "team_home": "تونس", "team_away": "هولندا", "time": datetime(2026, 6, 26, 2, 0, tzinfo=ksa_tz)},
 {"id": 59, "team_home": "باراغواي", "team_away": "أستراليا", "time": datetime(2026, 6, 26, 5, 0, tzinfo=ksa_tz)},
-{"id": 60, "team_home": "تركيا", "team_away": "الولايات المتحدة", "time": datetime(2026, 6, 26, 5, 0, tzinfo=ksa_tz)},
+{"id": 60, "team_home": "تركيا", "team_away": "أمريكا", "time": datetime(2026, 6, 26, 5, 0, tzinfo=ksa_tz)},
 {"id": 61, "team_home": "فرنسا", "team_away": "النرويج", "time": datetime(2026, 6, 26, 22, 0, tzinfo=ksa_tz)},
 {"id": 62, "team_home": "السنغال", "team_away": "العراق", "time": datetime(2026, 6, 26, 22, 0, tzinfo=ksa_tz)},
 
@@ -272,8 +272,8 @@ if not st.session_state["is_logged_in"]:
 
         else:
             st.subheader("🔐 تسجيل دخول مشاركي الحديقة")
-            login_phone = st.text_input("📱 أدخل رقم جوالك المعتمد:", max_chars=10)
-            login_pass = st.text_input("🔐 أدخل كلمة المرور الخاصة بك:", type="password")
+            login_phone = st.text_input("📱 اسم المستخدم / رقم الجوال:", max_chars=10, key="username_field")
+            login_pass = st.text_input("🔐 كلمة المرور:", type="password", key="password_field")
             
             if st.button("تسجيل الدخول 🚀"):
                 if login_phone and login_pass:
