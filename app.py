@@ -11,6 +11,20 @@ now_ksa = datetime.now(ksa_tz)
 
 st.set_page_config(page_title="⚽🏆 WC26 KING", page_icon="", layout="centered")
 
+FLAGS = {
+    "السعودية":"🇸🇦","الأرجنتين":"🇦🇷","البرازيل":"🇧🇷","فرنسا":"🇫🇷","ألمانيا":"🇩🇪",
+    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴","اسكتلندا":"🏴","المغرب":"🇲🇦",
+    "الجزائر":"🇩🇿","تونس":"🇹🇳","مصر":"🇪🇬","قطر":"🇶🇦","المكسيك":"🇲🇽",
+    "الولايات المتحدة":"🇺🇸","كندا":"🇨🇦","أستراليا":"🇦🇺","تركيا":"🇹🇷","سويسرا":"🇨🇭",
+    "التشيك":"🇨🇿","كوريا الجنوبية":"🇰🇷","باراغواي":"🇵🇾","هايتي":"🇭🇹","أوروغواي":"🇺🇾",
+    "الأوروغواي":"🇺🇾","أوزبكستان":"🇺🇿","إيران":"🇮🇷","الأردن":"🇯🇴","الإكوادور":"🇪🇨",
+    "البوسنة والهرسك":"🇧🇦","الرأس الأخضر":"🇨🇻","السنغال":"🇸🇳","السويد":"🇸🇪","العراق":"🇮🇶",
+    "الكونغو الديمقراطية":"🇨🇩","النرويج":"🇳🇴","النمسا":"🇦🇹","اليابان":"🇯🇵","بلجيكا":"🇧🇪",
+    "بنما":"🇵🇦","جنوب أفريقيا":"🇿🇦","ساحل العاج":"🇨🇮","غانا":"🇬🇭","كرواتيا":"🇭🇷",
+    "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
+}
+
+
 # تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
 # Design V2 فقط
 # استبدل CSS القديم بهذا
@@ -123,21 +137,6 @@ def init_db():
     return conn
 
 db_conn = init_db()
-
-
-FLAGS = {
-    "السعودية":"🇸🇦","الأرجنتين":"🇦🇷","البرازيل":"🇧🇷","فرنسا":"🇫🇷","ألمانيا":"🇩🇪",
-    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","اسكتلندا":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","المغرب":"🇲🇦",
-    "الجزائر":"🇩🇿","تونس":"🇹🇳","مصر":"🇪🇬","قطر":"🇶🇦","المكسيك":"🇲🇽",
-    "الولايات المتحدة":"🇺🇸","كندا":"🇨🇦","أستراليا":"🇦🇺","تركيا":"🇹🇷","سويسرا":"🇨🇭",
-    "التشيك":"🇨🇿","كوريا الجنوبية":"🇰🇷","باراغواي":"🇵🇾","هايتي":"🇭🇹","أوروغواي":"🇺🇾",
-    "الأوروغواي":"🇺🇾","أوزبكستان":"🇺🇿","إيران":"🇮🇷","الأردن":"🇯🇴","الإكوادور":"🇪🇨",
-    "البوسنة والهرسك":"🇧🇦","الرأس الأخضر":"🇨🇻","السنغال":"🇸🇳","السويد":"🇸🇪","العراق":"🇮🇶",
-    "الكونغو الديمقراطية":"🇨🇩","النرويج":"🇳🇴","النمسا":"🇦🇹","اليابان":"🇯🇵","بلجيكا":"🇧🇪",
-    "بنما":"🇵🇦","جنوب أفريقيا":"🇿🇦","ساحل العاج":"🇨🇮","غانا":"🇬🇭","كرواتيا":"🇭🇷",
-    "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
-}
-
 
 # رقم أدمن الحديقة الثابت
 ADMIN_PHONE = "0502518301" 
@@ -401,12 +400,11 @@ else:
             
             home_flag = FLAGS.get(match['team_home'], '🏳️')
             away_flag = FLAGS.get(match['team_away'], '🏳️')
-
             if match_status_row and match_status_row[0] is not None and match_status_row[1] is not None:
-                match_desc = f"{home_flag} {match['team_home']} {match_status_row[0]} × {match_status_row[1]} {away_flag} {match['team_away']} (انتهت واحتُسبت ✅)"
+                match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:12px;white-space:nowrap;font-size:32px;font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>{match_status_row[1]} × {match_status_row[0]}</span><span>{home_flag} {match['team_home']}</span></div><div style='text-align:center;color:#FFD700;font-size:26px;'>(انتهت واحتُسبت ✅)</div>"
                 is_calculated_and_valid = True
             else:
-                match_desc = f"{home_flag} {match['team_home']} × {away_flag} {match['team_away']}"
+                match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:12px;white-space:nowrap;font-size:32px;font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>×</span><span>{home_flag} {match['team_home']}</span></div>"
                 is_calculated_and_valid = False
             
             is_within_24h = (timedelta(hours=0) <= time_until_match <= timedelta(hours=24))
@@ -416,7 +414,7 @@ else:
                 with st.container():
                     st.markdown(f"""
                     <div class="match-card">
-                        <h4>{match_desc}</h4>
+                        {match_desc}
                         <p>
                             موعد اللقاء: {match['time'].strftime('%d يونيو | %I:%M %p')}
                         </p>
