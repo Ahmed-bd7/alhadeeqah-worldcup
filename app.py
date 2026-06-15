@@ -4,7 +4,28 @@ from datetime import datetime, timedelta
 import pytz
 import pandas as pd
 import sqlite3
-import base64
+
+from PIL import Image, ImageDraw, ImageFont
+import io
+
+def build_premium_card(player_name="لاعب", rank="#1", points="0"):
+    img = Image.new("RGB", (1080,1350), (11,93,59))
+    draw = ImageDraw.Draw(img)
+
+    draw.rectangle((20,20,1060,1330), outline=(212,175,55), width=8)
+
+    draw.text((390,80), "WC26 KING", fill=(255,215,0))
+    draw.text((420,220), "🏆", fill=(255,215,0))
+
+    draw.text((120,420), f"اللاعب: {player_name}", fill="white")
+    draw.text((120,560), f"المركز: {rank}", fill="white")
+    draw.text((120,700), f"النقاط: {points}", fill="white")
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
+
+
 
 # 1. إعداد المنطقة الزمنية وتنسيق الصفحة
 ksa_tz = pytz.timezone('Asia/Riyadh')
@@ -227,20 +248,6 @@ def get_internal_matches():
 {"id": 72, "team_home": "الأردن", "team_away": "الأرجنتين", "time": datetime(2026, 6, 28, 5, 0, tzinfo=ksa_tz)},
     ]
 
-
-
-def make_share_card(title, lines):
-    html = f"""
-    <div style='background:#0b5d1e;border:4px solid gold;border-radius:20px;padding:20px;color:white;text-align:center'>
-    <h2>{title}</h2>
-    {'<br>'.join(lines)}
-    </div>
-    """
-    b64 = base64.b64encode(html.encode()).decode()
-    st.markdown(html, unsafe_allow_html=True)
-    st.code("انسخ البطاقة أو التقط لقطة شاشة للمشاركة")
-
-
 all_matches = get_internal_matches()
 
 # إدارة حالة تسجيل الدخول عبر الـ session_state لمنع اختفاء البيانات عند تحديث الصفحة
@@ -352,24 +359,6 @@ else:
     # --- تبويب لوحة الصدارة ---
     with tab_leaderboard:
         st.markdown("### 🤩🏆 جدول الترتيب لايف")
-        col_s1,col_s2=st.columns(2)
-        with col_s1:
-            if st.button("🏆 مشاركة مركزي"):
-                cursor=db_conn.cursor()
-                cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
-                ranks=cursor.fetchall()
-                for r_i,r in enumerate(ranks,1):
-                    if r[2]==login_phone:
-                        make_share_card("WC26 KING",[f"👤 {r[0]}",f"🏅 المركز #{r_i}",f"⭐ {r[1]} نقطة",f"👥 المشاركون {len(ranks)}"])
-                        break
-        with col_s2:
-            if st.button("📋 مشاركة آخر 20 توقعًا"):
-                cursor=db_conn.cursor()
-                cursor.execute("SELECT match_id,pred_home,pred_away FROM predictions WHERE phone=? ORDER BY match_id DESC LIMIT 20",(login_phone,))
-                preds=cursor.fetchall()
-                lines=[f"م{m}: {h}-{a}" for m,h,a in preds]
-                make_share_card("آخر 20 توقع",lines if lines else ["لا توجد توقعات"])
-
         cursor = db_conn.cursor()
         cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
         leaderboard_data = cursor.fetchall()
@@ -476,12 +465,6 @@ else:
                             ''', (login_phone, match["id"], h_score, a_score))
                             db_conn.commit()
                             st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
-                            make_share_card(
-                                "توقع جديد",
-                                [f"{match['team_home']} {h_score} × {a_score} {match['team_away']}",
-                                 f"المشارك: {login_phone}"]
-                            )
-
 
 
     with tab_schedule:
