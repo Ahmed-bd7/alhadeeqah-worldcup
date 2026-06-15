@@ -4,26 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 import pandas as pd
 import sqlite3
-
-from PIL import Image, ImageDraw
-from io import BytesIO
-
-def _share_image(title, lines):
-    img = Image.new("RGB", (1080, 1350), "#0d3b2e")
-    d = ImageDraw.Draw(img)
-    d.rectangle((20,20,1060,1330), outline="#d4af37", width=6)
-    d.text((60,60), "WC26 KING", fill="#d4af37")
-    d.text((60,130), title, fill="white")
-    y = 220
-    for line in lines:
-        d.text((60,y), str(line), fill="white")
-        y += 50
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-    return buf
-
-
+import base64
 
 # 1. إعداد المنطقة الزمنية وتنسيق الصفحة
 ksa_tz = pytz.timezone('Asia/Riyadh')
@@ -33,7 +14,7 @@ st.set_page_config(page_title="⚽🏆 WC26 KING", page_icon="", layout="centere
 
 FLAGS = {
     "السعودية":"🇸🇦","الأرجنتين":"🇦🇷","البرازيل":"🇧🇷","فرنسا":"🇫🇷","ألمانيا":"🇩🇪",
-    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","اسكتلندا":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","المغرب":"🇲🇦",
+    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴","اسكتلندا":"🏴","المغرب":"🇲🇦",
     "الجزائر":"🇩🇿","تونس":"🇹🇳","مصر":"🇪🇬","قطر":"🇶🇦","المكسيك":"🇲🇽",
     "الولايات المتحدة":"🇺🇸","كندا":"🇨🇦","أستراليا":"🇦🇺","تركيا":"🇹🇷","سويسرا":"🇨🇭",
     "التشيك":"🇨🇿","كوريا الجنوبية":"🇰🇷","باراغواي":"🇵🇾","هايتي":"🇭🇹","أوروغواي":"🇺🇾",
@@ -195,7 +176,7 @@ def get_internal_matches():
 {"id": 26, "team_home": "سويسرا", "team_away": "البوسنة والهرسك", "time": datetime(2026, 6, 18, 22, 0, tzinfo=ksa_tz)},
 {"id": 27, "team_home": "كندا", "team_away": "قطر", "time": datetime(2026, 6, 19, 1, 0, tzinfo=ksa_tz)},
 {"id": 28, "team_home": "المكسيك", "team_away": "كوريا الجنوبية", "time": datetime(2026, 6, 19, 4, 0, tzinfo=ksa_tz)},
-{"id": 29, "team_home": "الولايات المتحدة", "team_away": "أستراليا", "time": datetime(2026, 6, 19, 22, 0, tzinfo=ksa_tz)},
+{"id": 29, "team_home": "أمريكا", "team_away": "أستراليا", "time": datetime(2026, 6, 19, 22, 0, tzinfo=ksa_tz)},
 {"id": 30, "team_home": "اسكتلندا", "team_away": "المغرب", "time": datetime(2026, 6, 20, 1, 0, tzinfo=ksa_tz)},
 {"id": 31, "team_home": "البرازيل", "team_away": "هايتي", "time": datetime(2026, 6, 20, 3, 30, tzinfo=ksa_tz)},
 {"id": 32, "team_home": "تركيا", "team_away": "باراغواي", "time": datetime(2026, 6, 20, 6, 0, tzinfo=ksa_tz)},
@@ -229,7 +210,7 @@ def get_internal_matches():
 {"id": 57, "team_home": "اليابان", "team_away": "السويد", "time": datetime(2026, 6, 26, 2, 0, tzinfo=ksa_tz)},
 {"id": 58, "team_home": "تونس", "team_away": "هولندا", "time": datetime(2026, 6, 26, 2, 0, tzinfo=ksa_tz)},
 {"id": 59, "team_home": "باراغواي", "team_away": "أستراليا", "time": datetime(2026, 6, 26, 5, 0, tzinfo=ksa_tz)},
-{"id": 60, "team_home": "تركيا", "team_away": "الولايات المتحدة", "time": datetime(2026, 6, 26, 5, 0, tzinfo=ksa_tz)},
+{"id": 60, "team_home": "تركيا", "team_away": "أمريكا", "time": datetime(2026, 6, 26, 5, 0, tzinfo=ksa_tz)},
 {"id": 61, "team_home": "فرنسا", "team_away": "النرويج", "time": datetime(2026, 6, 26, 22, 0, tzinfo=ksa_tz)},
 {"id": 62, "team_home": "السنغال", "team_away": "العراق", "time": datetime(2026, 6, 26, 22, 0, tzinfo=ksa_tz)},
 
@@ -245,6 +226,20 @@ def get_internal_matches():
 {"id": 71, "team_home": "الجزائر", "team_away": "النمسا", "time": datetime(2026, 6, 28, 5, 0, tzinfo=ksa_tz)},
 {"id": 72, "team_home": "الأردن", "team_away": "الأرجنتين", "time": datetime(2026, 6, 28, 5, 0, tzinfo=ksa_tz)},
     ]
+
+
+
+def make_share_card(title, lines):
+    html = f"""
+    <div style='background:#0b5d1e;border:4px solid gold;border-radius:20px;padding:20px;color:white;text-align:center'>
+    <h2>{title}</h2>
+    {'<br>'.join(lines)}
+    </div>
+    """
+    b64 = base64.b64encode(html.encode()).decode()
+    st.markdown(html, unsafe_allow_html=True)
+    st.code("انسخ البطاقة أو التقط لقطة شاشة للمشاركة")
+
 
 all_matches = get_internal_matches()
 
@@ -357,35 +352,23 @@ else:
     # --- تبويب لوحة الصدارة ---
     with tab_leaderboard:
         st.markdown("### 🤩🏆 جدول الترتيب لايف")
-
-        col_a, col_b = st.columns(2)
-
-        with col_a:
+        col_s1,col_s2=st.columns(2)
+        with col_s1:
             if st.button("🏆 مشاركة مركزي"):
-                my_rank = 1
-                my_points = 0
-                total_players = len(leaderboard_data) if 'leaderboard_data' in locals() else 0
-                for r_i, r in enumerate(leaderboard_data):
-                    if r[2] == login_phone:
-                        my_rank = r_i + 1
-                        my_points = r[1]
+                cursor=db_conn.cursor()
+                cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
+                ranks=cursor.fetchall()
+                for r_i,r in enumerate(ranks,1):
+                    if r[2]==login_phone:
+                        make_share_card("WC26 KING",[f"👤 {r[0]}",f"🏅 المركز #{r_i}",f"⭐ {r[1]} نقطة",f"👥 المشاركون {len(ranks)}"])
                         break
-                card = _share_image("مشاركة المركز", [
-                    f"الاسم: {user_name}",
-                    f"المركز: #{my_rank}",
-                    f"النقاط: {my_points}",
-                    f"المشاركون: {total_players}"
-                ])
-                st.download_button("⬇️ تحميل بطاقة المركز", card, "wc26_rank.png", "image/png")
-
-        with col_b:
-            if st.button("📋 مشاركة آخر 20 توقعاً"):
-                cur = db_conn.cursor()
-                cur.execute("SELECT match_id,pred_home,pred_away FROM predictions WHERE phone=? ORDER BY match_id DESC LIMIT 20",(login_phone,))
-                preds = cur.fetchall()
-                lines = [f"مباراة {p[0]} : {p[1]}-{p[2]}" for p in preds]
-                card = _share_image("آخر 20 توقعاً", lines if lines else ["لا توجد توقعات"])
-                st.download_button("⬇️ تحميل بطاقة التوقعات", card, "wc26_predictions.png", "image/png")
+        with col_s2:
+            if st.button("📋 مشاركة آخر 20 توقعًا"):
+                cursor=db_conn.cursor()
+                cursor.execute("SELECT match_id,pred_home,pred_away FROM predictions WHERE phone=? ORDER BY match_id DESC LIMIT 20",(login_phone,))
+                preds=cursor.fetchall()
+                lines=[f"م{m}: {h}-{a}" for m,h,a in preds]
+                make_share_card("آخر 20 توقع",lines if lines else ["لا توجد توقعات"])
 
         cursor = db_conn.cursor()
         cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
@@ -493,12 +476,12 @@ else:
                             ''', (login_phone, match["id"], h_score, a_score))
                             db_conn.commit()
                             st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
-                            card = _share_image("مشاركة التوقع", [
-                                f"{match['team_home']} × {match['team_away']}",
-                                f"التوقع: {h_score}-{a_score}",
-                                f"المشارك: {user_name}"
-                            ])
-                            st.download_button("📤 مشاركة هذا التوقع", card, file_name=f"match_{match['id']}.png", mime="image/png")
+                            make_share_card(
+                                "توقع جديد",
+                                [f"{match['team_home']} {h_score} × {a_score} {match['team_away']}",
+                                 f"المشارك: {login_phone}"]
+                            )
+
 
 
     with tab_schedule:
