@@ -5,6 +5,26 @@ import pytz
 import pandas as pd
 import sqlite3
 
+from PIL import Image, ImageDraw
+from io import BytesIO
+
+def _share_image(title, lines):
+    img = Image.new("RGB", (1080, 1350), "#0d3b2e")
+    d = ImageDraw.Draw(img)
+    d.rectangle((20,20,1060,1330), outline="#d4af37", width=6)
+    d.text((60,60), "WC26 KING", fill="#d4af37")
+    d.text((60,130), title, fill="white")
+    y = 220
+    for line in lines:
+        d.text((60,y), str(line), fill="white")
+        y += 50
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
+
+
+
 # 1. إعداد المنطقة الزمنية وتنسيق الصفحة
 ksa_tz = pytz.timezone('Asia/Riyadh')
 now_ksa = datetime.now(ksa_tz)
@@ -337,6 +357,36 @@ else:
     # --- تبويب لوحة الصدارة ---
     with tab_leaderboard:
         st.markdown("### 🤩🏆 جدول الترتيب لايف")
+
+        col_a, col_b = st.columns(2)
+
+        with col_a:
+            if st.button("🏆 مشاركة مركزي"):
+                my_rank = 1
+                my_points = 0
+                total_players = len(leaderboard_data) if 'leaderboard_data' in locals() else 0
+                for r_i, r in enumerate(leaderboard_data):
+                    if r[2] == login_phone:
+                        my_rank = r_i + 1
+                        my_points = r[1]
+                        break
+                card = _share_image("مشاركة المركز", [
+                    f"الاسم: {user_name}",
+                    f"المركز: #{my_rank}",
+                    f"النقاط: {my_points}",
+                    f"المشاركون: {total_players}"
+                ])
+                st.download_button("⬇️ تحميل بطاقة المركز", card, "wc26_rank.png", "image/png")
+
+        with col_b:
+            if st.button("📋 مشاركة آخر 20 توقعاً"):
+                cur = db_conn.cursor()
+                cur.execute("SELECT match_id,pred_home,pred_away FROM predictions WHERE phone=? ORDER BY match_id DESC LIMIT 20",(login_phone,))
+                preds = cur.fetchall()
+                lines = [f"مباراة {p[0]} : {p[1]}-{p[2]}" for p in preds]
+                card = _share_image("آخر 20 توقعاً", lines if lines else ["لا توجد توقعات"])
+                st.download_button("⬇️ تحميل بطاقة التوقعات", card, "wc26_predictions.png", "image/png")
+
         cursor = db_conn.cursor()
         cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
         leaderboard_data = cursor.fetchall()
@@ -443,6 +493,12 @@ else:
                             ''', (login_phone, match["id"], h_score, a_score))
                             db_conn.commit()
                             st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
+                            card = _share_image("مشاركة التوقع", [
+                                f"{match['team_home']} × {match['team_away']}",
+                                f"التوقع: {h_score}-{a_score}",
+                                f"المشارك: {user_name}"
+                            ])
+                            st.download_button("📤 مشاركة هذا التوقع", card, file_name=f"match_{match['id']}.png", mime="image/png")
 
 
     with tab_schedule:
