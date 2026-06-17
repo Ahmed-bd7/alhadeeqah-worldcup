@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 import pandas as pd
 import sqlite3
+import urllib.parse
 
 # 1. إعداد المنطقة الزمنية وتنسيق الصفحة
 ksa_tz = pytz.timezone('Asia/Riyadh')
@@ -328,10 +329,11 @@ else:
             "⚙️ الإدارة"
         ])
     else:
-        tab_leaderboard, tab_predict, tab_schedule = st.tabs([
+        tab_leaderboard, tab_predict, tab_schedule, tab_profile = st.tabs([
             "🏆🔥جدول الترتيب",
             "🤩التوقعات الحالية",
-            "📅 مواعيد فتح التوقعات"
+            "📅 مواعيد فتح التوقعات",
+            "👤 ملفي الشخصي"
         ])
 
     # --- تبويب لوحة الصدارة ---
@@ -444,6 +446,18 @@ else:
                             db_conn.commit()
                             st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
 
+                            share_text = f"""🏆 WC26 KING
+
+👤 {user_name}
+
+⚽ {match['team_home']} × {match['team_away']}
+
+🎯 توقعي:
+{match['team_home']} {h_score} - {a_score} {match['team_away']}"""
+
+                            wa_link = "https://wa.me/?text=" + urllib.parse.quote(share_text)
+                            st.link_button("📲 مشاركة التوقع عبر واتساب", wa_link)
+
 
     with tab_schedule:
         st.subheader("📅 مواعيد فتح التوقعات")
@@ -477,6 +491,49 @@ else:
             hide_index=True,
             use_container_width=True
         )
+
+
+    with tab_profile:
+        st.subheader("👤 ملفي الشخصي")
+
+        cursor = db_conn.cursor()
+        cursor.execute("SELECT points FROM users WHERE phone = ?", (login_phone,))
+        row = cursor.fetchone()
+        user_points = row[0] if row else 0
+
+        cursor.execute("""
+            SELECT p.pred_home, p.pred_away,
+                   pm.actual_home, pm.actual_away
+            FROM predictions p
+            JOIN processed_matches pm ON p.match_id = pm.match_id
+            WHERE p.phone = ?
+        """, (login_phone,))
+
+        correct = 0
+        wrong = 0
+
+        for ph, pa, ah, aa in cursor.fetchall():
+            pred_sign = (ph > pa) - (ph < pa)
+            actual_sign = (ah > aa) - (ah < aa)
+
+            if ph == ah and pa == aa:
+                correct += 1
+            elif pred_sign == actual_sign:
+                correct += 1
+            else:
+                wrong += 1
+
+        total = correct + wrong
+        success_rate = round((correct / total) * 100, 1) if total else 0
+
+        st.markdown(f"### {user_name}")
+        st.metric("🏆 النقاط", user_points)
+
+        c1, c2, c3 = st.columns(3)
+        c1.metric("✅ صحيحة", correct)
+        c2.metric("❌ خاطئة", wrong)
+        c3.metric("📊 نسبة النجاح", f"{success_rate}%")
+
 
     # --- تبويب الإدارة والتحكم (يظهر للأدمن فقط) ---
     if login_phone == ADMIN_PHONE:
