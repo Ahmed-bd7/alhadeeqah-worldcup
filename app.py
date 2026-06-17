@@ -405,13 +405,15 @@ else:
             if match_status_row and match_status_row[0] is not None and match_status_row[1] is not None:
                 match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>{match_status_row[1]} × {match_status_row[0]}</span><span>{home_flag} {match['team_home']}</span></div><div style='text-align:center;color:#FFD700;font-size:20px;'>(انتهت واحتُسبت ✅)</div>"
                 is_calculated_and_valid = True
-            else:
+                        else:
                 match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>×</span><span>{home_flag} {match['team_home']}</span></div>"
                 is_calculated_and_valid = False
-            
-     is_within_24h = (timedelta(hours=0) <= time_until_match <= timedelta(hours=24))
+
+            is_within_24h = (timedelta(hours=0) <= time_until_match <= timedelta(hours=24))
             is_june_11 = (match["time"].day == 11 and match["time"].month == 6)
- if ( match["time"] <= now_ksa
+
+            if (
+                match["time"] <= now_ksa
                 or is_within_24h
                 or is_june_11
                 or is_calculated_and_valid
