@@ -354,7 +354,7 @@ else:
         # عرض العداد فوق التوقعات ليراها العضو بشكل دائم ومحفز
         st.markdown(f"""
         <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700; border-radius: 15px; padding: 15px; text-align: center; margin-bottom: 20px;">
-            <span style="font-size: 20px; font-weight: bold; color: #FFD700;">✌🏼 رصيد دبلها المتبقي: {remaining_jokers} من 8 ⌛️</span>
+            <span style="font-size: 20px; font-weight: bold; color: #FFD700;">✌🏼 رصيد دبلها المتبقي: {remaining_jokers} من 8 </span>
         </div>
         """, unsafe_allow_html=True)
 
