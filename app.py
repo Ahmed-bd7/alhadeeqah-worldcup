@@ -433,8 +433,8 @@ else:
                     else:
                         cursor.execute("SELECT pred_home, pred_away FROM predictions WHERE phone = ? AND match_id = ?", (login_phone, match["id"]))
                         existing_pred = cursor.fetchone()
-                    if existing_pred:
-    share_text = f"""🏆 WC26 KING
+                        if existing_pred:
+                       share_text = f"""🏆 WC26 KING
 
 👤 {user_name}
 
