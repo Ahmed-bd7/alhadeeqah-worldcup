@@ -354,7 +354,7 @@ else:
         # عرض العداد فوق التوقعات ليراها العضو بشكل دائم ومحفز
         st.markdown(f"""
         <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700; border-radius: 15px; padding: 15px; text-align: center; margin-bottom: 20px;">
-            <span style="font-size: 20px; font-weight: bold; color: #FFD700;">🃏 رصيد جواكرك المتبقي: {remaining_jokers} من 8 🃏</span>
+            <span style="font-size: 20px; font-weight: bold; color: #FFD700;">✌🏼 رصيد دبلها المتبقي: {remaining_jokers} من 8 ⌛️</span>
         </div>
         """, unsafe_allow_html=True)
 
@@ -397,7 +397,7 @@ else:
                         with c2: a_score = st.number_input(f"أهداف {match['team_away']}", 0, 10, value=val_away, key=f"a_{match['id']}")
                         
                         # تشيك بوكس الجوكر للمباراة
-                        use_joker = st.checkbox("🃏 تفعيل الجوكر لهذه المباراة (تدبيل النقاط!)", value=is_joker_checked, key=f"joker_{match['id']}")
+                        use_joker = st.checkbox("✌🏼 تفعيل دبلها لهذه المباراة (تدبيل النقاط!)", value=is_joker_checked, key=f"joker_{match['id']}")
                         
                         col_submit, col_share = st.columns(2)
                         
