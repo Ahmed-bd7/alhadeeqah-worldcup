@@ -421,7 +421,7 @@ else:
                         
                         with col_share:
                             joker_tag = "✌🏼 [مباراة دبلها - النقاط مدبّلة!]" if use_joker else ""
-                            share_text = f"🏆 *WC26 KING الحديقة_المونديال#*\n\n👤 *{user_name}*\n\n⚽ {home_flag} *{match['team_home']} × {match['team_away']}* {away_flag}\n{joker_tag}\n\n🎯 *توقعي للمباراة:*\n{match['team_home']} {h_score} - {a_score} {match['team_away']}"
+                            share_text = f"🏆 *WC26 KING 🏆🇸🇦الحديقة_المونديال#*\n\n👤 *{user_name}*\n\n⚽ {home_flag} *{match['team_home']} × {match['team_away']}* {away_flag}\n{joker_tag}\n\n🎯 *توقعي للمباراة:*\n{match['team_home']} {h_score} - {a_score} {match['team_away']}"
                             wa_link = "https://wa.me/?text=" + urllib.parse.quote(share_text)
                             st.link_button("📲 مشاركة التوقع عبر واتساب", wa_link, key=f"share_{match['id']}")
 
