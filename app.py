@@ -410,8 +410,7 @@ else:
                 is_calculated_and_valid = False
             
             is_within_24h = (timedelta(hours=0) <= time_until_match <= timedelta(hours=24))
-            is_june_11 = (match["time"].day == 11 and match["time"].month == 6)
-            
+            is_june_11 = (match["time"].day == 11 and match["time"].month == 6) 
            if (
     time_until_match <= timedelta(hours=24)
     or is_june_11
