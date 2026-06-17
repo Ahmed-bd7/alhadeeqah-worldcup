@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 import pandas as pd
 import sqlite3
+import urllib.parse  # مضاف لترميز نصوص الواتساب بشكل صحيح
 
 # 1. إعداد المنطقة الزمنية وتنسيق الصفحة
 ksa_tz = pytz.timezone('Asia/Riyadh')
@@ -27,8 +28,6 @@ FLAGS = {
 
 # تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
 # Design V2 فقط
-# استبدل CSS القديم بهذا
-
 st.markdown("""
 <style>
 .stApp{
@@ -435,14 +434,38 @@ else:
                         with c2:
                             a_score = st.number_input(f"أهداف {match['team_away']}", 0, 10, value=val_away, key=f"a_{match['id']}")
                         
-                        if st.button(f"اعتماد التوقع لمباراة {match['team_home']} × {match['team_away']}", key=f"btn_{match['id']}"):
-                            cursor.execute('''
-                                INSERT INTO predictions (phone, match_id, pred_home, pred_away)
-                                VALUES (?, ?, ?, ?)
-                                ON CONFLICT(phone, match_id) DO UPDATE SET pred_home=excluded.pred_home, pred_away=excluded.pred_away
-                            ''', (login_phone, match["id"], h_score, a_score))
-                            db_conn.commit()
-                            st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
+                        # --- تقسيم الأزرار جنبًا إلى جنب بالتساوي (50% لكل زر) ---
+                        col_submit, col_share = st.columns(2)
+                        
+                        with col_submit:
+                            if st.button(f"اعتماد التوقع لمباراة {match['team_home']} × {match['team_away']}", key=f"btn_{match['id']}"):
+                                cursor.execute('''
+                                    INSERT INTO predictions (phone, match_id, pred_home, pred_away)
+                                    VALUES (?, ?, ?, ?)
+                                    ON CONFLICT(phone, match_id) DO UPDATE SET pred_home=excluded.pred_home, pred_away=excluded.pred_away
+                                ''', (login_phone, match["id"], h_score, a_score))
+                                db_conn.commit()
+                                st.success("تم تسجيل وتأمين توقعك بنجاح! 🏁")
+                        
+                        with col_share:
+                            # صياغة نص المشاركة متضمنًا الأعلام والأسماء والخطوط العريضة لقروبات الواتساب
+                            share_text = f"""🏆 *WC26 KING*
+
+👤 *{user_name}*
+
+⚽ {home_flag} *{match['team_home']} × {match['team_away']}* {away_flag}
+
+🎯 *توقعي للمباراة:*
+{match['team_home']} {h_score} - {a_score} {match['team_away']}"""
+
+                            wa_link = "https://wa.me/?text=" + urllib.parse.quote(share_text)
+                            
+                            # إنشاء زر بتصميم رسمي متوافق مع باكيج Streamlit الأصلي لفتح الروابط
+                            st.link_button(
+                                "📲 مشاركة التوقع عبر واتساب",
+                                wa_link,
+                                key=f"share_{match['id']}"
+                            )
 
 
     with tab_schedule:
