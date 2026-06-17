@@ -405,19 +405,14 @@ else:
             if match_status_row and match_status_row[0] is not None and match_status_row[1] is not None:
                 match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>{match_status_row[1]} × {match_status_row[0]}</span><span>{home_flag} {match['team_home']}</span></div><div style='text-align:center;color:#FFD700;font-size:20px;'>(انتهت واحتُسبت ✅)</div>"
                 is_calculated_and_valid = True
-                    
-        else:
+            else:
                 match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>×</span><span>{home_flag} {match['team_home']}</span></div>"
                 is_calculated_and_valid = False
-                is_within_24h = (timedelta(hours=0) <= time_until_match <= timedelta(hours=24))
-                is_june_11 = (match["time"].day == 11 and match["time"].month == 6)
-        if (
-                match["time"] <= now_ksa
-                or is_within_24h
-                or is_june_11
-                or is_calculated_and_valid
-                or (login_phone == ADMIN_PHONE)
-            ):
+            
+            is_within_24h = (timedelta(hours=0) <= time_until_match <= timedelta(hours=24))
+            is_june_11 = (match["time"].day == 11 and match["time"].month == 6)
+            
+            if is_within_24h or is_june_11 or is_calculated_and_valid or (login_phone == ADMIN_PHONE):
                 with st.container():
                     st.markdown(f"""
                     <div class="match-card">
@@ -433,22 +428,6 @@ else:
                     else:
                         cursor.execute("SELECT pred_home, pred_away FROM predictions WHERE phone = ? AND match_id = ?", (login_phone, match["id"]))
                         existing_pred = cursor.fetchone()
-                        if existing_pred:
-                       share_text = f"""🏆 WC26 KING
-
-👤 {user_name}
-
-⚽ {match['team_home']} × {match['team_away']}
-
-🎯 توقعي:
-{match['team_home']} {existing_pred[0]} - {existing_pred[1]} {match['team_away']}"""
-
-    wa_link = "https://wa.me/?text=" + urllib.parse.quote(share_text)
-    st.link_button(
-        "📲 مشاركة التوقع عبر واتساب",
-        wa_link,
-        key=f"share_{match['id']}"
-    )
                         val_home = existing_pred[0] if existing_pred else 0
                         val_away = existing_pred[1] if existing_pred else 0
                         
@@ -515,7 +494,7 @@ else:
 
 
     with tab_profile:
-        st.subheader("اوبتاالمونديال 📊")
+        st.subheader("👤 ملفي الشخصي")
 
         cursor = db_conn.cursor()
         cursor.execute("SELECT points FROM users WHERE phone = ?", (login_phone,))
@@ -551,8 +530,8 @@ else:
         st.metric("🏆 النقاط", user_points)
 
         c1, c2, c3 = st.columns(3)
-        c1.metric("✅ توقعات صحيحة", correct)
-        c2.metric("❌ توقعات خاطئة", wrong)
+        c1.metric("✅ صحيحة", correct)
+        c2.metric("❌ خاطئة", wrong)
         c3.metric("📊 نسبة النجاح", f"{success_rate}%")
 
 
