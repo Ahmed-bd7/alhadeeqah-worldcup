@@ -14,7 +14,7 @@ st.set_page_config(page_title="⚽🏆 WC26 KING", page_icon="", layout="centere
 
 FLAGS = {
     "السعودية":"🇸🇦","الأرجنتين":"🇦🇷","البرازيل":"🇧🇷","فرنسا":"🇫🇷","ألمانيا":"🇩🇪",
-    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","اسكتلندا":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","المغرب":"🇲🇦",
+    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴󠁧󠁢󠁥النرجستان","اسكتلندا":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","المغرب":"🇲🇦",
     "الجزائر":"🇩🇿","تونس":"🇹🇳","مصر":"🇪🇬","قطر":"🇶🇦","المكسيك":"🇲🇽",
     "الولايات المتحدة":"🇺🇸","كندا":"🇨🇦","أستراليا":"🇦🇺","تركيا":"🇹🇷","سويسرا":"🇨🇭",
     "التشيك":"🇨🇿","كوريا الجنوبية":"🇰🇷","باراغواي":"🇵🇾","هايتي":"🇭🇹","أوروغواي":"🇺🇾",
@@ -126,7 +126,6 @@ def init_db():
             actual_away INTEGER
         )
     ''')
-    # للتأكد من وجود عمود الجوكر لو قاعدة البيانات منشأة مسبقاً
     try:
         cursor.execute("ALTER TABLE predictions ADD COLUMN is_joker INTEGER DEFAULT 0")
         conn.commit()
@@ -155,7 +154,7 @@ def get_internal_matches():
 {"id": 13, "team_home": "إسبانيا", "team_away": "الرأس الأخضر", "time": datetime(2026, 6, 15, 19, 0, tzinfo=ksa_tz)},
 {"id": 14, "team_home": "بلجيكا", "team_away": "مصر", "time": datetime(2026, 6, 15, 22, 0, tzinfo=ksa_tz)},
 {"id": 15, "team_home": "السعودية", "team_away": "الأوروغواي", "time": datetime(2026, 6, 16, 1, 0, tzinfo=ksa_tz)},
-{"id": 16, "team_home": "إران", "team_away": "نيوزيلندا", "time": datetime(2026, 6, 16, 4, 0, tzinfo=ksa_tz)},
+{"id": 16, "team_home": "إيران", "team_away": "نيوزيلندا", "time": datetime(2026, 6, 16, 4, 0, tzinfo=ksa_tz)},
 {"id": 17, "team_home": "فرنسا", "team_away": "السنغال", "time": datetime(2026, 6, 16, 22, 0, tzinfo=ksa_tz)},
 {"id": 18, "team_home": "النرويج", "team_away": "العراق", "time": datetime(2026, 6, 17, 1, 0, tzinfo=ksa_tz)},
 {"id": 19, "team_home": "الأرجنتين", "team_away": "الجزائر", "time": datetime(2026, 6, 17, 4, 0, tzinfo=ksa_tz)},
@@ -312,8 +311,76 @@ else:
     with tab_leaderboard:
         st.markdown("### 🤩🏆 جدول الترتيب لايف")
         cursor = db_conn.cursor()
+        
+        # جلب جميع المستخدمين مرتبين حسب النقاط لمعرفة الترتيب الكلي
         cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
         leaderboard_data = cursor.fetchall()
+        
+        # 1. حساب ترتيب المستخدم الحالي ونقاطه بدقة
+        user_rank = 0
+        user_current_points = 0
+        for idx, row in enumerate(leaderboard_data):
+            if row[2] == login_phone:
+                user_rank = idx + 1
+                user_current_points = row[1]
+                break
+        
+        # 2. حساب الإحصائيات الدقيقة للمستخدم الحالي (صحيح، خاطئ، نسبة) بناء على المباريات الملعوبة
+        cursor.execute("""
+            SELECT p.pred_home, p.pred_away, pm.actual_home, pm.actual_away 
+            FROM predictions p
+            JOIN processed_matches pm ON p.match_id = pm.match_id
+            WHERE p.phone = ?
+        """, (login_phone,))
+        user_calculated_preds = cursor.fetchall()
+        
+        correct_count = 0
+        wrong_count = 0
+        
+        for pred in user_calculated_preds:
+            p_h, p_a, a_h, a_a = pred
+            # إذا جاب النتيجة بالملي أو التوجه صحيح (فوز/خسارة/تعادل) يعتبر توقع صحيح
+            if (p_h == a_h and p_a == a_a) or \
+               (p_h > p_a and a_h > a_a) or \
+               (p_h < p_a and a_h < a_a) or \
+               (p_h == p_a and a_h == a_a):
+                correct_count += 1
+            else:
+                wrong_count += 1
+                
+        total_user_preds = correct_count + wrong_count
+        success_ratio = round((correct_count / total_user_preds) * 100, 1) if total_user_preds > 0 else 0.0
+        
+        # 3. عرض بطاقات الإحصائيات الخاصة بالعضو في أعلى جدول الترتيب
+        st.markdown(f"<h4 style='color:#FFD700;'>📊 إحصائياتك الشخصية يا {user_name}</h4>", unsafe_allow_html=True)
+        stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
+        with stat_col1:
+            st.metric(label="✅ توقعات صحيحة", value=correct_count)
+        with stat_col2:
+            st.metric(label="❌ توقعات خاطئة", value=wrong_count)
+        with stat_col3:
+            st.metric(label="🎯 نسبة النجاح", value=f"{success_ratio}%")
+        with stat_col4:
+            st.metric(label="🎖️ ترتيبك الحالي", value=f"#{user_rank}")
+            
+        # --- زر مشاركة الإحصائيات والترتيب عبر الواتساب ---
+        share_stats_text = f"""📊 *حصيلة ملك التوقعات في الحديقة* 👑
+
+👤 *الاسم:* {user_name}
+🎖️ *الترتيب الحالي:* المركز {user_rank}
+🏆 *مجموع النقاط:* {user_current_points} نقطة
+
+📈 *أرقام التحدي:*
+✅ التوقعات الصحيحة: {correct_count}
+❌ التوقعات الخاطئة: {wrong_count}
+🎯 نسبة دقة التوقعات: {success_ratio}%
+
+#WC26_KING 🔥⚽️"""
+
+        wa_stats_link = "https://wa.me/?text=" + urllib.parse.quote(share_stats_text)
+        st.link_button("📲 شارك ترتيبك وإحصائياتك في القروب 🔥", wa_stats_link)
+        
+        st.markdown("---") # خط فاصل لعزل الإحصائيات عن الصدارة العامة
         
         for idx, row in enumerate(leaderboard_data):
             p_name, p_points, p_phone = row
@@ -369,8 +436,24 @@ else:
             
             home_flag = FLAGS.get(match['team_home'], '🏳️')
             away_flag = FLAGS.get(match['team_away'], '🏳️')
+            
             if match_status_row and match_status_row[0] is not None and match_status_row[1] is not None:
-                match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>{match_status_row[1]} × {match_status_row[0]}</span><span>{home_flag} {match['team_home']}</span></div><div style='text-align:center;color:#FFD700;font-size:20px;'>(انتهت واحتُسبت ✅)</div>"
+                # --- حساب النقاط المكتسبة لهذه المباراة بالتحديد لعرضها للعضو لايف ---
+                actual_h, actual_a = match_status_row[0], match_status_row[1]
+                cursor.execute("SELECT pred_home, pred_away, is_joker FROM predictions WHERE phone = ? AND match_id = ?", (login_phone, match["id"]))
+                user_pred_row = cursor.fetchone()
+                
+                earned_pts = 0
+                if user_pred_row:
+                    p_home, p_away, p_joker = user_pred_row
+                    if p_home == actual_h and p_away == actual_a:
+                        earned_pts = 3
+                    elif (p_home > p_away and actual_h > actual_a) or (p_home < p_away and actual_h < actual_a) or (p_home == p_away and actual_h == actual_a):
+                        earned_pts = 1
+                    if p_joker == 1:
+                        earned_pts *= 2
+                
+                match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>{match_status_row[1]} × {match_status_row[0]}</span><span>{home_flag} {match['team_home']}</span></div><div style='text-align:center;color:#00e676;font-size:20px;font-weight:bold;'>(انتهت واحتُسبت ✅ | حصلت على: {earned_pts} نقاط)</div>"
                 is_calculated_and_valid = True
             else:
                 match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>×</span><span>{home_flag} {match['team_home']}</span></div>"
@@ -403,7 +486,6 @@ else:
                         
                         with col_submit:
                             if st.button(f"اعتماد التوقع لمباراة {match['team_home']} × {match['team_away']}", key=f"btn_{match['id']}"):
-                                # إذا فعل جوكر جديد ولم يكن مفعلاً سابقاً لهذه المباراة، نتحقق من الحد الكلي (8)
                                 if use_joker and not is_joker_checked:
                                     if remaining_jokers <= 0:
                                         st.error("⚠️ يالشيخ، استهلكت جميع الجواكر الـ 8 المتاحة لك في البطولة!")
@@ -434,15 +516,15 @@ else:
             rows.append({"المباراة": f"{match['team_home']} × {match['team_away']}", "فتح التوقعات": open_time.strftime("%d/%m %I:%M %p"), "موعد المباراة": match["time"].strftime("%d/%m %I:%M %p"), "الحالة": status})
         st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
 
-    # --- تبويب الإدارة والتحكم (يظهر للأدمن فقط مع احتساب الجواكر الـ 8) ---
+    # --- تبويب الإدارة والتحكم ---
     if login_phone == ADMIN_PHONE:
         with tab_admin:
             st.markdown('<div class="admin-card">⚙️ <b>لوحة تحكم الإدارة الملكية (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
             cursor = db_conn.cursor()
             
-            st.subheader("🧮 إدارة وإدخل نتائج المباريات")
+            st.subheader("🧮 إدارة وإدخال نتائج المباريات")
             match_options = {f"{m['team_home']} × {m['team_away']}": m for m in all_matches}
-            selected_match_str = st.selectbox("إختر المباراة المستهدفة لإدخل/تعديل نتيجتها:", list(match_options.keys()))
+            selected_match_str = st.selectbox("إختر المباراة المستهدفة لإدخال/تعديل نتيجتها:", list(match_options.keys()))
             selected_match = match_options[selected_match_str]
             
             cursor.execute("SELECT actual_home, actual_away FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
