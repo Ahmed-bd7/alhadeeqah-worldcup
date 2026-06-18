@@ -21,7 +21,7 @@ FLAGS = {
     "الأوروغواي":"🇺🇾","أوزبكستان":"🇺🇿","إيران":"🇮🇷","الأردن":"🇯🇴","الإكوادور":"🇪🇨",
     "البوسنة والهرسك":"🇧🇦","الرأس الأخضر":"🇨🇻","السنغال":"🇸🇳","السويد":"🇸🇪","العراق":"🇮🇶",
     "الكونغو الديمقراطية":"🇨🇩","النرويج":"🇳🇴","النمسا":"🇦🇹","اليابان":"🇯🇵","بلجيكا":"🇧🇪",
-    "بنما":"🇵🇦","جنوب أفريقيا":"🇿🇦","ساحل العاج":"🇨🇮","غانا":"🇬🇭","كرواتيا":"🇭🇷",
+    "بنما":"🇵🇦","جنوب أفريقيا":"🇿🇦","ساحل العاج":"🇨🇮","غانا":"🇬🇭","كرواتيا":"🇭روسيا",
     "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
 }
 
@@ -87,6 +87,36 @@ padding:25px;
 background:linear-gradient(135deg,#004d2b,#00a85a);
 border-radius:25px;
 padding:25px;
+}
+
+/* --- [تعديل جديد] ستايل مخصص لجعل كروت الإحصائيات صغيرة وعلى خط واحد في الجوال --- */
+.stats-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 15px;
+    direction: rtl;
+}
+.stat-box {
+    flex: 1;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 8px 4px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+.stat-box-label {
+    font-size: clamp(10px, 2.5vw, 13px);
+    color: #b3b3b3;
+    margin-bottom: 2px;
+    white-space: nowrap;
+}
+.stat-box-value {
+    font-size: clamp(14px, 3.5vw, 18px);
+    font-weight: bold;
+    color: #FFD700;
+    white-space: nowrap;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -201,7 +231,7 @@ def get_internal_matches():
 {"id": 60, "team_home": "تركيا", "team_away": "الولايات المتحدة", "time": datetime(2026, 6, 26, 5, 0, tzinfo=ksa_tz)},
 {"id": 61, "team_home": "فرنسا", "team_away": "النرويج", "time": datetime(2026, 6, 26, 22, 0, tzinfo=ksa_tz)},
 {"id": 62, "team_home": "السنغال", "team_away": "العراق", "time": datetime(2026, 6, 26, 22, 0, tzinfo=ksa_tz)},
-{"id": 63, "team_home": "الرأس الأخضر", "team_away": "السعودية", "time": datetime(2026, 6, 27, 3, 0, tzinfo=ksa_tz)},
+{"id": 63, "team_home": "الرأس الأخضر", "team_away": "السعودية", "time": datetime(2027, 6, 27, 3, 0, tzinfo=ksa_tz)},
 {"id": 64, "team_home": "أوروغواي", "team_away": "إسبانيا", "time": datetime(2026, 6, 27, 3, 0, tzinfo=ksa_tz)},
 {"id": 65, "team_home": "مصر", "team_away": "إيران", "time": datetime(2026, 6, 27, 6, 0, tzinfo=ksa_tz)},
 {"id": 66, "team_home": "نيوزيلندا", "team_away": "بلجيكا", "time": datetime(2026, 6, 27, 6, 0, tzinfo=ksa_tz)},
@@ -312,11 +342,9 @@ else:
         st.markdown("### 🤩🏆 جدول الترتيب لايف")
         cursor = db_conn.cursor()
         
-        # جلب جميع المستخدمين مرتبين حسب النقاط لمعرفة الترتيب الكلي
         cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
         leaderboard_data = cursor.fetchall()
         
-        # 1. حساب ترتيب المستخدم الحالي ونقاطه بدقة
         user_rank = 0
         user_current_points = 0
         for idx, row in enumerate(leaderboard_data):
@@ -325,7 +353,6 @@ else:
                 user_current_points = row[1]
                 break
         
-        # 2. حساب الإحصائيات الدقيقة للمستخدم الحالي (صحيح، خاطئ، نسبة) بناء على المباريات الملعوبة
         cursor.execute("""
             SELECT p.pred_home, p.pred_away, pm.actual_home, pm.actual_away 
             FROM predictions p
@@ -339,7 +366,6 @@ else:
         
         for pred in user_calculated_preds:
             p_h, p_a, a_h, a_a = pred
-            # إذا جاب النتيجة بالملي أو التوجه صحيح (فوز/خسارة/تعادل) يعتبر توقع صحيح
             if (p_h == a_h and p_a == a_a) or \
                (p_h > p_a and a_h > a_a) or \
                (p_h < p_a and a_h < a_a) or \
@@ -351,19 +377,30 @@ else:
         total_user_preds = correct_count + wrong_count
         success_ratio = round((correct_count / total_user_preds) * 100, 1) if total_user_preds > 0 else 0.0
         
-        # 3. عرض بطاقات الإحصائيات الخاصة بالعضو في أعلى جدول الترتيب
-        st.markdown(f"<h4 style='color:#FFD700;'>📊 إحصائياتك الشخصية يا {user_name}</h4>", unsafe_allow_html=True)
-        stat_col1, stat_col2, stat_col3, stat_col4 = st.columns(4)
-        with stat_col1:
-            st.metric(label="✅ توقعات صحيحة", value=correct_count)
-        with stat_col2:
-            st.metric(label="❌ توقعات خاطئة", value=wrong_count)
-        with stat_col3:
-            st.metric(label="🎯 نسبة النجاح", value=f"{success_ratio}%")
-        with stat_col4:
-            st.metric(label="🎖️ ترتيبك الحالي", value=f"#{user_rank}")
+        st.markdown(f"<h4 style='color:#FFD700; margin-bottom:10px;'>📊 إحصائياتك الشخصية يا {user_name}</h4>", unsafe_allow_html=True)
+        
+        # --- [تعديل جديد] طباعة كروت الإحصائيات الأربعة مصغرة وعلى سطر واحد أفقي ---
+        st.markdown(f"""
+        <div class="stats-container">
+            <div class="stat-box">
+                <div class="stat-box-label">✅ صحيحة</div>
+                <div class="stat-box-value">{correct_count}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-label">❌ خاطئة</div>
+                <div class="stat-box-value">{wrong_count}</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-label">🎯 النجاح</div>
+                <div class="stat-box-value">{success_ratio}%</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-box-label">🎖️ الترتيب</div>
+                <div class="stat-box-value">#{user_rank}</div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
             
-        # --- زر مشاركة الإحصائيات والترتيب عبر الواتساب ---
         share_stats_text = f"""📊 *حصيلة ملك التوقعات في الحديقة* 👑
 
 👤 *الاسم:* {user_name}
@@ -380,7 +417,7 @@ else:
         wa_stats_link = "https://wa.me/?text=" + urllib.parse.quote(share_stats_text)
         st.link_button("📲 شارك ترتيبك وإحصائياتك في القروب 🔥", wa_stats_link)
         
-        st.markdown("---") # خط فاصل لعزل الإحصائيات عن الصدارة العامة
+        st.markdown("---") 
         
         for idx, row in enumerate(leaderboard_data):
             p_name, p_points, p_phone = row
@@ -412,13 +449,11 @@ else:
     with tab_predict:
         st.subheader("⚽️⚒️ هنا التحدي يا متحدددي ")
         
-        # حساب كم جوكر استخدم المستخدم حاليًا في قاعدة البيانات
         cursor = db_conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM predictions WHERE phone = ? AND is_joker = 1", (login_phone,))
         used_jokers = cursor.fetchone()[0]
         remaining_jokers = max(0, 8 - used_jokers)
         
-        # عرض العداد فوق التوقعات ليراها العضو بشكل دائم ومحفز
         st.markdown(f"""
         <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700; border-radius: 15px; padding: 15px; text-align: center; margin-bottom: 20px;">
             <span style="font-size: 20px; font-weight: bold; color: #FFD700;">✌🏼 رصيد دبلها المتبقي: {remaining_jokers} من 8 </span>
@@ -438,7 +473,6 @@ else:
             away_flag = FLAGS.get(match['team_away'], '🏳️')
             
             if match_status_row and match_status_row[0] is not None and match_status_row[1] is not None:
-                # --- حساب النقاط المكتسبة لهذه المباراة بالتحديد لعرضها للعضو لايف ---
                 actual_h, actual_a = match_status_row[0], match_status_row[1]
                 cursor.execute("SELECT pred_home, pred_away, is_joker FROM predictions WHERE phone = ? AND match_id = ?", (login_phone, match["id"]))
                 user_pred_row = cursor.fetchone()
@@ -453,7 +487,14 @@ else:
                     if p_joker == 1:
                         earned_pts *= 2
                 
-                match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>{match_status_row[1]} × {match_status_row[0]}</span><span>{home_flag} {match['team_home']}</span></div><div style='text-align:center;color:#00e676;font-size:20px;font-weight:bold;'>(انتهت واحتُسبت ✅ | حصلت على: {earned_pts} نقاط)</div>"
+                # --- [تعديل جديد] تصغير خط عبارة الاحتساب وجعلها على سطر واحد يمنع الانقسام بدقة عبر ستايل مخصص ---
+                match_desc = f"""
+                <div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'>
+                    <span>{away_flag} {match['team_away']}</span><span>{match_status_row[1]} × {match_status_row[0]}</span><span>{home_flag} {match['team_home']}</span>
+                </div>
+                <div style='text-align:center;color:#00e676;font-size:clamp(12px, 3.2vw, 15px);font-weight:bold;white-space:nowrap;margin-top:5px;'>
+                    (انتهت واحتُسبت ✅ | حصلت على: {earned_pts} نقاط)
+                </div>"""
                 is_calculated_and_valid = True
             else:
                 match_desc = f"<div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'><span>{away_flag} {match['team_away']}</span><span>×</span><span>{home_flag} {match['team_home']}</span></div>"
@@ -479,7 +520,6 @@ else:
                         with c1: h_score = st.number_input(f"أهداف {match['team_home']}", 0, 10, value=val_home, key=f"h_{match['id']}")
                         with c2: a_score = st.number_input(f"أهداف {match['team_away']}", 0, 10, value=val_away, key=f"a_{match['id']}")
                         
-                        # تشيك بوكس الجوكر للمباراة
                         use_joker = st.checkbox("✌🏼 تفعيل دبلها لهذه المباراة (تدبيل النقاط!)", value=is_joker_checked, key=f"joker_{match['id']}")
                         
                         col_submit, col_share = st.columns(2)
