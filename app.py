@@ -419,7 +419,7 @@ else:
 #WC26_KING 🔥⚽️"""
 
         wa_stats_link = "https://wa.me/?text=" + urllib.parse.quote(share_stats_text)
-        st.link_button("📲 شارك ترتيبك وإحصائياتك في القروب 🔥", wa_stats_link)
+        st.link_button("📲 شارك ترتيبك وإحصائياتك   🔥", wa_stats_link)
         
         st.markdown("---") 
         
