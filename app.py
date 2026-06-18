@@ -555,7 +555,7 @@ else:
         rows = []
         for match in all_matches:
             open_time = match["time"] - timedelta(hours=24)
-            status = "🔴 مغلق" if now_ksa >= match["time"] else ("🟢 مفتوح الآن" if now_ksa >= open_time else f"🟡 بعد {(open_time - now_ksa).days} يوم")
+            status = "🔴 مغلق" if now_ksa >= match["time"] else ("🟢 مفتوح الآن" if now_ksa >= open_time else f"🟡 بعد {(open_time - now_ksa).days.hours} يوم")
             rows.append({"المباراة": f"{match['team_home']} × {match['team_away']}", "فتح التوقعات": open_time.strftime("%d/%m %I:%M %p"), "موعد المباراة": match["time"].strftime("%d/%m %I:%M %p"), "الحالة": status})
         st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
 
