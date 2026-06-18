@@ -379,7 +379,7 @@ else:
         # --- [التعديل الجديد] تصغير خط عنوان الإحصائيات الشخصية وجعله متناسقًا ومناسبًا للجوال ---
         st.markdown(f"""
         <div style="text-align: right; color: #FFD700; font-size: clamp(14px, 3.8vw, 18px); font-weight: bold; margin-bottom: 12px; white-space: nowrap;">
-            📊 إحصائياتك الشخصية يا {user_name}
+            📊 Opta {user_name}
         </div>
         """, unsafe_allow_html=True)
         
