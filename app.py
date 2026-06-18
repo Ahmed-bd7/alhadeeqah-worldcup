@@ -14,7 +14,7 @@ st.set_page_config(page_title="⚽🏆 WC26 KING", page_icon="", layout="centere
 
 FLAGS = {
     "السعودية":"🇸🇦","الأرجنتين":"🇦🇷","البرازيل":"🇧🇷","فرنسا":"🇫🇷","ألمانيا":"🇩🇪",
-    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴󠁧󠁢󠁥النرجستان","اسكتلندا":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","المغرب":"🇲🇦",
+    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴\u200d󠁢󠁥النرجستان","اسكتلندا":"🏴\u200d󠁢󠁳󠁣󠁴󠁿","المغرب":"🇲🇦",
     "الجزائر":"🇩🇿","تونس":"🇹🇳","مصر":"🇪🇬","قطر":"🇶🇦","المكسيك":"🇲🇽",
     "الولايات المتحدة":"🇺🇸","كندا":"🇨🇦","أستراليا":"🇦🇺","تركيا":"🇹🇷","سويسرا":"🇨🇭",
     "التشيك":"🇨🇿","كوريا الجنوبية":"🇰🇷","باراغواي":"🇵🇾","هايتي":"🇭🇹","أوروغواي":"🇺🇾",
@@ -22,7 +22,7 @@ FLAGS = {
     "البوسنة والهرسك":"🇧🇦","الرأس الأخضر":"🇨🇻","السنغال":"🇸🇳","السويد":"🇸🇪","العراق":"🇮🇶",
     "الكونغو الديمقراطية":"🇨🇩","النرويج":"🇳🇴","النمسا":"🇦🇹","اليابان":"🇯🇵","بلجيكا":"🇧🇪",
     "بنما":"🇵🇦","جنوب أفريقيا":"🇿🇦","ساحل العاج":"🇨🇮","غانا":"🇬🇭","كرواتيا":"🇭روسيا",
-    "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
+    "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولا ندا":"🇳🇱"
 }
 
 # تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
@@ -89,7 +89,7 @@ border-radius:25px;
 padding:25px;
 }
 
-/* --- [تعديل جديد] ستايل مخصص لجعل كروت الإحصائيات صغيرة وعلى خط واحد في الجوال --- */
+/* ستايل مخصص لجعل كروت الإحصائيات صغيرة وعلى خط واحد في الجوال */
 .stats-container {
     display: flex;
     justify-content: space-between;
@@ -184,7 +184,7 @@ def get_internal_matches():
 {"id": 13, "team_home": "إسبانيا", "team_away": "الرأس الأخضر", "time": datetime(2026, 6, 15, 19, 0, tzinfo=ksa_tz)},
 {"id": 14, "team_home": "بلجيكا", "team_away": "مصر", "time": datetime(2026, 6, 15, 22, 0, tzinfo=ksa_tz)},
 {"id": 15, "team_home": "السعودية", "team_away": "الأوروغواي", "time": datetime(2026, 6, 16, 1, 0, tzinfo=ksa_tz)},
-{"id": 16, "team_home": "إيران", "team_away": "نيوزيلندا", "time": datetime(2026, 6, 16, 4, 0, tzinfo=ksa_tz)},
+{"id": 16, "team_home": "إران", "team_away": "نيوزيلندا", "time": datetime(2026, 6, 16, 4, 0, tzinfo=ksa_tz)},
 {"id": 17, "team_home": "فرنسا", "team_away": "السنغال", "time": datetime(2026, 6, 16, 22, 0, tzinfo=ksa_tz)},
 {"id": 18, "team_home": "النرويج", "team_away": "العراق", "time": datetime(2026, 6, 17, 1, 0, tzinfo=ksa_tz)},
 {"id": 19, "team_home": "الأرجنتين", "team_away": "الجزائر", "time": datetime(2026, 6, 17, 4, 0, tzinfo=ksa_tz)},
@@ -339,7 +339,6 @@ else:
 
     # --- تبويب لوحة الصدارة ---
     with tab_leaderboard:
-        st.markdown("### 🤩🏆 جدول الترتيب لايف")
         cursor = db_conn.cursor()
         
         cursor.execute("SELECT name, points, phone FROM users ORDER BY points DESC")
@@ -377,9 +376,14 @@ else:
         total_user_preds = correct_count + wrong_count
         success_ratio = round((correct_count / total_user_preds) * 100, 1) if total_user_preds > 0 else 0.0
         
-        st.markdown(f"<h4 style='color:#FFD700; margin-bottom:10px;'>📊 إحصائياتك الشخصية يا {user_name}</h4>", unsafe_allow_html=True)
+        # --- [التعديل الجديد] تصغير خط عنوان الإحصائيات الشخصية وجعله متناسقًا ومناسبًا للجوال ---
+        st.markdown(f"""
+        <div style="text-align: right; color: #FFD700; font-size: clamp(14px, 3.8vw, 18px); font-weight: bold; margin-bottom: 12px; white-space: nowrap;">
+            📊 إحصائياتك الشخصية يا {user_name}
+        </div>
+        """, unsafe_allow_html=True)
         
-        # --- [تعديل جديد] طباعة كروت الإحصائيات الأربعة مصغرة وعلى سطر واحد أفقي ---
+        # طباعة كروت الإحصائيات الأربعة مصغرة وعلى سطر واحد أفقي
         st.markdown(f"""
         <div class="stats-container">
             <div class="stat-box">
@@ -487,7 +491,6 @@ else:
                     if p_joker == 1:
                         earned_pts *= 2
                 
-                # --- [تعديل جديد] تصغير خط عبارة الاحتساب وجعلها على سطر واحد يمنع الانقسام بدقة عبر ستايل مخصص ---
                 match_desc = f"""
                 <div style='display:flex;justify-content:center;align-items:center;gap:6px;white-space:nowrap;overflow-x:auto;padding:0 5px;font-size:clamp(18px,4vw,24px);font-weight:bold;color:#FFD700;'>
                     <span>{away_flag} {match['team_away']}</span><span>{match_status_row[1]} × {match_status_row[0]}</span><span>{home_flag} {match['team_home']}</span>
