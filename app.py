@@ -492,7 +492,7 @@ else:
         
         st.markdown(f"""
         <div class="champion-box-card">
-            <h2 style="color: #FFD700; margin-bottom: 5px; font-weight: 900; font-size: clamp(22px, 5.5vw, 26px);">بطل كاس العالم 2026 🏆</h2>
+            <h2 style="color: #FFD700; margin-bottom: 5px; font-weight: 900; font-size: clamp(22px, 5.5vw, 26px);">🏆 بطل كاس العالم 2026 </h2>
             <p style="color: #cccccc; font-size: clamp(12px, 3.2vw, 14px); margin-bottom: 5px;">توقع المنتخب الذي سيرفع كأس العالم واكسب <b style="color:#FFD700;">+10 نقاط إضافية</b> في رصيدك!</p>
             <p style="color: #ff9800; font-size: 12px; font-weight: bold; margin-bottom: 10px;">🔒 يقفل التوقع يوم 28 يونيو الساعة 9:00 مساءً</p>
             {champ_html_badge}
@@ -506,7 +506,7 @@ else:
             default_idx = 0
             
         selected_champ = st.selectbox(
-            "👑 اختر المنتخب الفائز باللقب :", 
+            "👑  اختر المنتخب الفائز باللقب ", 
             all_teams, 
             index=default_idx, 
             disabled=is_champ_locked,
