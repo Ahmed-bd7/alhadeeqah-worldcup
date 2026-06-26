@@ -261,7 +261,7 @@ def get_internal_matches():
 {"id": 60, "team_home": "تركيا", "team_away": "الولايات المتحدة", "time": datetime(2026, 6, 26, 5, 0, tzinfo=ksa_tz)},
 {"id": 61, "team_home": "فرنسا", "team_away": "النرويج", "time": datetime(2026, 6, 26, 22, 0, tzinfo=ksa_tz)},
 {"id": 62, "team_home": "السنغال", "team_away": "العراق", "time": datetime(2026, 6, 26, 22, 0, tzinfo=ksa_tz)},
-{"id": 63, "team_home": "الرأس الأخضر", "team_away": "السعودية", "time": datetime(2027, 6, 27, 3, 0, tzinfo=ksa_tz)},
+{"id": 63, "team_home": "الرأس الأخضر", "team_away": "السعودية", "time": datetime(2026, 6, 27, 3, 0, tzinfo=ksa_tz)},
 {"id": 64, "team_home": "أوروغواي", "team_away": "إسبانيا", "time": datetime(2026, 6, 27, 3, 0, tzinfo=ksa_tz)},
 {"id": 65, "team_home": "مصر", "team_away": "إيران", "time": datetime(2026, 6, 27, 6, 0, tzinfo=ksa_tz)},
 {"id": 66, "team_home": "نيوزيلندا", "team_away": "بلجيكا", "time": datetime(2026, 6, 27, 6, 0, tzinfo=ksa_tz)},
