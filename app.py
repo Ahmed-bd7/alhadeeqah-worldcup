@@ -89,6 +89,7 @@ border-radius:25px;
 padding:25px;
 }
 
+/* ستايل مخصص لكروت الإحصائيات */
 .stats-container {
     display: flex;
     justify-content: space-between;
@@ -118,6 +119,7 @@ padding:25px;
     white-space: nowrap;
 }
 
+/* ستايل كرت توقع بطل المونديال - تم تعديله ليطابق كرت المباراة تماماً */
 .champion-box-card {
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(0, 77, 43, 0.4));
     border: 1px solid rgba(255,255,255,.2);
@@ -174,13 +176,6 @@ def init_db():
             match_id INTEGER PRIMARY KEY,
             actual_home INTEGER,
             actual_away INTEGER
-        )
-    ''')
-    # جدول جديد لحفظ بطل كأس العالم الحقيقي لتسهيل احتساب وتعديل النقاط
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS actual_champion (
-            id INTEGER PRIMARY KEY AUTO_INCREMENT,
-            champion_team TEXT
         )
     ''')
     
@@ -449,6 +444,7 @@ else:
             with col_rank: 
                 st.markdown(f"<div style='font-size: 18px; font-weight: bold; padding-top: 8px;'>{rank_icon}</div>", unsafe_allow_html=True)
             with col_name: 
+                # تعديل لعرض العلم فقط بجانب اسم المستخدم مباشرة بدون نصوص إضافية
                 if p_champ:
                     display_html = f"""
                     <div style='padding-top: 8px; font-size: 16px; font-weight: bold;'>
@@ -491,11 +487,12 @@ else:
         tournament_start_time = datetime(2026, 6, 28, 21, 0, tzinfo=ksa_tz)
         is_champ_locked = now_ksa >= tournament_start_time
         
-        champ_html_badge = f"<div class='champion-saved-badge'>🎯 توقعك الحالي: {FLAGS.get(current_champ, '🔮')} {current_champ}</div>" if current_champ else "<div class='champion-saved-badge' style='background:linear-gradient(90deg, #ff5252, #ff1744); color:white !important;'>⚠️ لم تختر بطلاً بعد!</div>"
+        # ==================== [عرض صندوق توقع البطل متناسق تماماً مع كروت المباريات] ====================
+        champ_html_badge = f"<div class='champion-saved-badge'>🎯 توقعك الحالي: {FLAGS.get(current_champ, '🔮')} {current_champ}</div>" if current_champ else "<div class='champion-saved-badge' style='background:linear-gradient(90deg, #ff5252, #ff1744); color:white !important;'>⚠️ لم تختر بطلاً بعد</div>"
         
         st.markdown(f"""
         <div class="champion-box-card">
-            <h2 style="color: #FFD700; margin-bottom: 5px; font-weight: 900; font-size: clamp(22px, 5.5vw, 26px);">🏆بطل كاس العالم 2026</h2>
+            <h2 style="color: #FFD700; margin-bottom: 5px; font-weight: 900; font-size: clamp(22px, 5.5vw, 26px);">🏆 بطل كاس العالم 2026 </h2>
             <p style="color: #cccccc; font-size: clamp(12px, 3.2vw, 14px); margin-bottom: 5px;">توقع المنتخب الذي سيرفع كأس العالم واكسب <b style="color:#FFD700;">+10 نقاط إضافية</b> في رصيدك!</p>
             <p style="color: #ff9800; font-size: 12px; font-weight: bold; margin-bottom: 10px;">🔒 يقفل التوقع يوم 28 يونيو الساعة 9:00 مساءً</p>
             {champ_html_badge}
@@ -509,7 +506,7 @@ else:
             default_idx = 0
             
         selected_champ = st.selectbox(
-            "👑 اختر المنتخب الفائز باللقب :", 
+            "👑  اختر المنتخب الفائز باللقب ", 
             all_teams, 
             index=default_idx, 
             disabled=is_champ_locked,
@@ -521,7 +518,7 @@ else:
             if is_champ_locked:
                 st.error("🔒 مغلق! انتهت المهلة المحددة ولا يمكن تعديل البطل.")
             else:
-                if st.button("🎯 اعتمد توقع البطل", key="save_champion_btn"):
+                if st.button("🎯 اعتماد توقع البطل", key="save_champion_btn"):
                     cursor.execute("UPDATE users SET champion_pred = ? WHERE phone = ?", (selected_champ, login_phone))
                     db_conn.commit()
                     st.success(f"تم تثبيت {selected_champ} بنجاح! 🔥")
@@ -537,6 +534,7 @@ else:
                 st.info("💡 احفظ خيار البطل أولاً لمشاركته.")
                 
         st.markdown("<hr style='border: 1px dashed rgba(255,215,0,0.25); margin: 35px 0;'>", unsafe_allow_html=True)
+        # =======================================================================================
 
         st.subheader("⚽️⚒️ هنا التحدي يا متحدددي ")
         
@@ -649,51 +647,6 @@ else:
         with tab_admin:
             st.markdown('<div class="admin-card">⚙️ <b>لوحة تحكم الإدارة الملكية (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
             cursor = db_conn.cursor()
-            
-            # ==================== [جديد: قسم احتساب بطل المونديال وتوزيع الـ 10 نقاط تلقائياً] ====================
-            st.subheader("👑 احتساب وتوزيع نقاط بطل كأس العالم (+10 نقاط)")
-            cursor.execute("SELECT champion_team FROM actual_champion WHERE id = 1")
-            champ_calculated_row = cursor.fetchone()
-            is_champ_already_calculated = champ_calculated_row is not None
-            
-            if is_champ_already_calculated:
-                st.warning(f"⚠️ تم احتساب البطل مسبقاً وهو: {champ_calculated_row[0]}")
-                if st.button("🚨 إلغاء البطل وسحب الـ 10 نقاط من الفائزين", key="cancel_champ_btn"):
-                    old_champ_team = champ_calculated_row[0]
-                    # سحب 10 نقاط من كل شخص توقعه صح
-                    cursor.execute("SELECT phone FROM users WHERE champion_pred = ?", (old_champ_team,))
-                    winners = cursor.fetchall()
-                    for w in winners:
-                        cursor.execute("UPDATE users SET points = MAX(0, points - 10) WHERE phone = ?", (w[0],))
-                    cursor.execute("DELETE FROM actual_champion WHERE id = 1")
-                    db_conn.commit()
-                    st.success("تم إلغاء احتساب البطل وسحب النقاط للجميع بنجاح!")
-                    st.rerun()
-            
-            selected_actual_champ = st.selectbox("اختر المنتخب الفائز بكأس العالم الحقيقي لإضافة نقاطه:", all_teams, key="actual_champ_select")
-            
-            if st.button("🔥 اعتماد بطل كأس العالم وتحديث جدول الصدارة فوراً!" if not is_champ_already_calculated else "📝 تحديث البطل وتعديل النقاط"):
-                if is_champ_already_calculated:
-                    # سحب النقاط القديمة أولاً لتفادي التكرار
-                    old_champ_team = champ_calculated_row[0]
-                    cursor.execute("SELECT phone FROM users WHERE champion_pred = ?", (old_champ_team,))
-                    for w in cursor.fetchall():
-                        cursor.execute("UPDATE users SET points = MAX(0, points - 10) WHERE phone = ?", (w[0],))
-                    cursor.execute("DELETE FROM actual_champion WHERE id = 1")
-                
-                # إضافة 10 نقاط للمستخدمين الذين توقعهم صحيح
-                cursor.execute("SELECT phone FROM users WHERE champion_pred = ?", (selected_actual_champ,))
-                correct_users = cursor.fetchall()
-                for u in correct_users:
-                    cursor.execute("UPDATE users SET points = points + 10 WHERE phone = ?", (u[0],))
-                
-                cursor.execute("INSERT INTO actual_champion (id, champion_team) VALUES (1, ?)", (selected_actual_champ,))
-                db_conn.commit()
-                st.success(f"🏆 مبروك! تم توزيع +10 نقاط لكل من توقع بطل كأس العالم ({selected_actual_champ}) بنجاح!")
-                st.rerun()
-                
-            st.markdown("<hr style='border: 1px dashed rgba(255,255,255,0.1);'>", unsafe_allow_html=True)
-            # ======================================================================================================
             
             st.subheader("🧮 إدارة وإدخل نتائج المباريات")
             match_options = {f"{m['team_home']} × {m['team_away']}": m for m in all_matches}
