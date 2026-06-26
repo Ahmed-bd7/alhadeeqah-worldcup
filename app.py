@@ -506,7 +506,7 @@ else:
             default_idx = 0
             
         selected_champ = st.selectbox(
-            "👑 توقعك للمنتخب الفائز باللقب :", 
+            "👑 اختر المنتخب الفائز باللقب :", 
             all_teams, 
             index=default_idx, 
             disabled=is_champ_locked,
@@ -518,7 +518,7 @@ else:
             if is_champ_locked:
                 st.error("🔒 مغلق! انتهت المهلة المحددة ولا يمكن تعديل البطل.")
             else:
-                if st.button("🎯 حفظ وتأمين خيار البطل", key="save_champion_btn"):
+                if st.button("🎯 اعتماد توقع البطل", key="save_champion_btn"):
                     cursor.execute("UPDATE users SET champion_pred = ? WHERE phone = ?", (selected_champ, login_phone))
                     db_conn.commit()
                     st.success(f"تم تثبيت {selected_champ} بنجاح! 🔥")
