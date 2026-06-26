@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import pytz
 import pandas as pd
 import sqlite3
-import urllib.parse  # مضاف لترميز نصوص الواتساب بشكل صحيح
+import urllib.parse
 
 # 1. إعداد المنطقة الزمنية وتنسيق الصفحة
 ksa_tz = pytz.timezone('Asia/Riyadh')
@@ -89,7 +89,7 @@ border-radius:25px;
 padding:25px;
 }
 
-/* ستايل مخصص لجعل كروت الإحصائيات صغيرة وعلى خط واحد في الجوال */
+/* ستايل مخصص لكروت الإحصائيات */
 .stats-container {
     display: flex;
     justify-content: space-between;
@@ -119,26 +119,26 @@ padding:25px;
     white-space: nowrap;
 }
 
-/* ستايل كرت توقع بطل المونديال المطور والفخم */
+/* ستايل كرت توقع بطل المونديال - تم تعديله ليطابق كرت المباراة تماماً */
 .champion-box-card {
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(0, 77, 43, 0.4));
-    border: 2px solid #FFD700;
-    border-radius: 25px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 30px;
     padding: 25px;
-    margin-bottom: 30px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 15px rgba(255, 215, 0, 0.1);
+    margin: 20px 0;
+    box-shadow: 0 15px 40px rgba(0,0,0,.45);
     text-align: center;
 }
 .champion-saved-badge {
     background: linear-gradient(90deg, #FFD700, #ffa726);
     color: #000000 !important;
     font-weight: 900;
-    font-size: 18px;
-    padding: 8px 20px;
+    font-size: 16px;
+    padding: 6px 18px;
     border-radius: 50px;
     display: inline-block;
-    margin: 15px 0;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -444,11 +444,11 @@ else:
             with col_rank: 
                 st.markdown(f"<div style='font-size: 18px; font-weight: bold; padding-top: 8px;'>{rank_icon}</div>", unsafe_allow_html=True)
             with col_name: 
+                # تعديل لعرض العلم فقط بجانب اسم المستخدم مباشرة بدون نصوص إضافية
                 if p_champ:
                     display_html = f"""
-                    <div style='line-height: 1.2;'>
-                        <span style='font-size: 16px; font-weight: bold;'>{p_name}</span><br>
-                        <span class='champ-badge'>🔮 البطل: {FLAGS.get(p_champ, '🏳️')} {p_champ}</span>
+                    <div style='padding-top: 8px; font-size: 16px; font-weight: bold;'>
+                        {p_name} {FLAGS.get(p_champ, '🏳️')}
                     </div>
                     """
                 else:
@@ -477,31 +477,28 @@ else:
                 del st.session_state[f"view_predictions_for"]
                 st.rerun()
 
-    # --- تبويب إدخال التوقعات (تم تجميل عرض توقع البطل بشكل كامل هنا) ---
+    # --- تبويب إدخل التوقعات ---
     with tab_predict:
         cursor = db_conn.cursor()
         
-        # جلب التوقع الحالي للبطل من قاعدة البيانات
         cursor.execute("SELECT champion_pred FROM users WHERE phone = ?", (login_phone,))
         current_champ = cursor.fetchone()[0]
         
-        # موعد قفل ميزة البطل يوم 28 يونيو الساعة 9 مساءً
         tournament_start_time = datetime(2026, 6, 28, 21, 0, tzinfo=ksa_tz)
         is_champ_locked = now_ksa >= tournament_start_time
         
-        # ==================== [العرض الجمالي المطور الفخم لتوقع بطل المونديال] ====================
+        # ==================== [عرض صندوق توقع البطل متناسق تماماً مع كروت المباريات] ====================
         champ_html_badge = f"<div class='champion-saved-badge'>🎯 توقعك الحالي: {FLAGS.get(current_champ, '🔮')} {current_champ}</div>" if current_champ else "<div class='champion-saved-badge' style='background:linear-gradient(90deg, #ff5252, #ff1744); color:white !important;'>⚠️ لم تختر بطلاً بعد!</div>"
         
         st.markdown(f"""
         <div class="champion-box-card">
-            <h2 style="color: #FFD700; margin-bottom: 5px; font-weight: 900; font-size: clamp(22px, 5.5vw, 28px);">🏆 توقع ملك الذهب والبطولة 🏆</h2>
+            <h2 style="color: #FFD700; margin-bottom: 5px; font-weight: 900; font-size: clamp(22px, 5.5vw, 26px);">🏆 توقع ملك الذهب والبطولة 🏆</h2>
             <p style="color: #cccccc; font-size: clamp(12px, 3.2vw, 14px); margin-bottom: 5px;">توقع المنتخب الذي سيرفع كأس العالم واكسب <b style="color:#FFD700;">+10 نقاط إضافية</b> تلقائياً في رصيدك!</p>
-            <p style="color: #ff9800; font-size: 12px; font-weight: bold; margin-bottom: 15px;">🔒 يقفل التوقع يوم 28 يونيو الساعة 9:00 مساءً</p>
+            <p style="color: #ff9800; font-size: 12px; font-weight: bold; margin-bottom: 10px;">🔒 يقفل التوقع يوم 28 يونيو الساعة 9:00 مساءً</p>
             {champ_html_badge}
         </div>
         """, unsafe_allow_html=True)
         
-        # تجهيز قائمة المنتخبات الفريدة المرتبة أبجدياً
         all_teams = sorted(list(FLAGS.keys()))
         try:
             default_idx = all_teams.index(current_champ) if current_champ in all_teams else 0
