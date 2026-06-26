@@ -20,7 +20,7 @@ FLAGS = {
     "التشيك":"🇨🇿","كوريا الجنوبية":"🇰🇷","باراغواي":"🇵🇾","هايتي":"🇭🇹","أوروغواي":"🇺🇾",
     "الأوروغواي":"🇺🇾","أوزبكستان":"🇺🇿","إيران":"🇮🇷","الأردن":"🇯🇴","الإكوادور":"🇪🇨",
     "البوسنة والهرسك":"🇧🇦","الرأس الأخضر":"🇨🇻","السنغال":"🇸🇳","السويد":"🇸🇪","العراق":"🇮🇶",
-    "الكونغو الديمقراطية":"🇨🇩","النرويج":"🇳🇴","النمسا":"🇦🇹","اليابان":"🇯🇵","بلجيكا":"🇧🇪",
+    "الكونغو الديمقراطية":"🇨دود","النرويج":"🇳🇴","النمسا":"🇦🇹","اليابان":"🇯🇵","بلجيكا":"🇧🇪",
     "بنما":"🇵🇦","جنوب أفريقيا":"🇿🇦","ساحل العاج":"🇨🇮","غانا":"🇬🇭","كرواتيا":"🇭روسيا",
     "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
 }
@@ -117,6 +117,28 @@ padding:25px;
     font-weight: bold;
     color: #FFD700;
     white-space: nowrap;
+}
+
+/* ستايل كرت توقع بطل المونديال المطور والفخم */
+.champion-box-card {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(0, 77, 43, 0.4));
+    border: 2px solid #FFD700;
+    border-radius: 25px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 15px rgba(255, 215, 0, 0.1);
+    text-align: center;
+}
+.champion-saved-badge {
+    background: linear-gradient(90deg, #FFD700, #ffa726);
+    color: #000000 !important;
+    font-weight: 900;
+    font-size: 18px;
+    padding: 8px 20px;
+    border-radius: 50px;
+    display: inline-block;
+    margin: 15px 0;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
 }
 </style>
 """, unsafe_allow_html=True)
@@ -348,7 +370,6 @@ else:
     # --- تبويب لوحة الصدارة ---
     with tab_leaderboard:
         cursor = db_conn.cursor()
-        
         cursor.execute("SELECT name, points, phone, champion_pred FROM users ORDER BY points DESC")
         leaderboard_data = cursor.fetchall()
         
@@ -372,13 +393,9 @@ else:
         
         correct_count = 0
         wrong_count = 0
-        
         for pred in user_calculated_preds:
             p_h, p_a, a_h, a_a = pred
-            if (p_h == a_h and p_a == a_a) or \
-               (p_h > p_a and a_h > a_a) or \
-               (p_h < p_a and a_h < a_a) or \
-               (p_h == p_a and a_h == a_a):
+            if (p_h == a_h and p_a == a_a) or (p_h > p_a and a_h > a_a) or (p_h < p_a and a_h < a_a) or (p_h == p_a and a_h == a_a):
                 correct_count += 1
             else:
                 wrong_count += 1
@@ -413,19 +430,7 @@ else:
         </div>
         """, unsafe_allow_html=True)
             
-        share_stats_text = f"""📊 *حصيلة ملك التوقعات في الحديقة* 👑
-
-👤 *الاسم:* {user_name}
-🎖️ *الترتيب الحالي:* المركز {user_rank}
-🏆 *مجموع النقاط:* {user_current_points} نقطة
-
-📈 *أرقام التحدي:*
-✅ التوقعات الصحيحة: {correct_count}
-❌ التوقعات الخاطئة: {wrong_count}
-🎯 نسبة دقة التوقعات: {success_ratio}%
-
-#WC26_KING 🔥⚽️"""
-
+        share_stats_text = f"""📊 *حصيلة ملك التوقعات في الحديقة* 👑\n\n👤 *الاسم:* {user_name}\n🎖️ *الترتيب الحالي:* المركز {user_rank}\n🏆 *مجموع النقاط:* {user_current_points} نقطة\n\n📈 *أرقام التحدي:*\n✅ التوقعات الصحيحة: {correct_count}\n❌ التوقعات الخاطئة: {wrong_count}\n🎯 نسبة دقة التوقعات: {success_ratio}%\n\n#WC26_KING 🔥⚽️"""
         wa_stats_link = "https://wa.me/?text=" + urllib.parse.quote(share_stats_text)
         st.link_button("📲 شارك ترتيبك وإحصائياتك   ", wa_stats_link)
         
@@ -433,17 +438,30 @@ else:
         
         for idx, row in enumerate(leaderboard_data):
             p_name, p_points, p_phone, p_champ = row
-            col_rank, col_name, col_pts, col_action = st.columns([1, 4, 2, 3])
-            with col_rank: st.markdown(f"**#{idx+1}**")
+            rank_icon = "🥇" if idx == 0 else ("🥈" if idx == 1 else ("🥉" if idx == 2 else f"#{idx+1}"))
+            col_rank, col_name, col_pts, col_action = st.columns([1.5, 4, 2.5, 3])
+            
+            with col_rank: 
+                st.markdown(f"<div style='font-size: 18px; font-weight: bold; padding-top: 8px;'>{rank_icon}</div>", unsafe_allow_html=True)
             with col_name: 
-                display_champ = f" ({FLAGS.get(p_champ, '')} {p_champ})" if p_champ else ""
-                st.markdown(f"{p_name}{display_champ}")
-            with col_pts: st.markdown(f"🏆 {p_points} Points")
+                if p_champ:
+                    display_html = f"""
+                    <div style='line-height: 1.2;'>
+                        <span style='font-size: 16px; font-weight: bold;'>{p_name}</span><br>
+                        <span class='champ-badge'>🔮 البطل: {FLAGS.get(p_champ, '🏳️')} {p_champ}</span>
+                    </div>
+                    """
+                else:
+                    display_html = f"<div style='font-size: 16px; font-weight: bold; padding-top: 8px;'>{p_name}</div>"
+                st.markdown(display_html, unsafe_allow_html=True)
+            with col_pts: 
+                st.markdown(f"<div style='color: #FFD700; font-weight: bold; font-size: 15px; padding-top: 8px;'>🏆 {p_points} Pts</div>", unsafe_allow_html=True)
             with col_action:
-                if st.button(f"مشاهدة التوقعات", key=f"rev_{p_phone}_{idx}"):
+                st.markdown("<div style='padding-top: 2px;'></div>", unsafe_allow_html=True)
+                if st.button(f"🔍 كشف التوقعات", key=f"rev_{p_phone}_{idx}"):
                     st.session_state[f"view_predictions_for"] = p_phone
                     st.session_state[f"view_predictions_name"] = p_name
-        
+                    
         if f"view_predictions_for" in st.session_state:
             target_phone = st.session_state[f"view_predictions_for"]
             target_name = st.session_state[f"view_predictions_name"]
@@ -459,36 +477,39 @@ else:
                 del st.session_state[f"view_predictions_for"]
                 st.rerun()
 
-    # --- تبويب إدخال التوقعات للمباريات مع ميزة نظام الـ 8 جواكر الكلي مضافاً له ميزة توقع البطل الكلية ---
+    # --- تبويب إدخال التوقعات (تم تجميل عرض توقع البطل بشكل كامل هنا) ---
     with tab_predict:
         cursor = db_conn.cursor()
         
-        # ==================== [الميزة الجديدة: توقع بطل المونديال] ====================
-        st.markdown("""
-        <div style="background: linear-gradient(135deg, #1e3a1f, #0f2610); border: 2px solid #FFD700; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.4);">
-            <h3 style="color: #FFD700; text-align: center; margin-top: 0; font-size: clamp(20px, 5vw, 26px);">👑 توقع بطل المونديال 👑</h3>
-            <p style="text-align: center; color: #e0e0e0; font-size: 14px;">حدد هوية البطل قبل يوم <b>28 يونيو الساعة 9:00 مساءً</b> واكسب <b>10 نقاط ذهبية</b>!</p>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        # جلب التوقع الحالي للبطل من جدول المستخدمين
+        # جلب التوقع الحالي للبطل من قاعدة البيانات
         cursor.execute("SELECT champion_pred FROM users WHERE phone = ?", (login_phone,))
         current_champ = cursor.fetchone()[0]
         
-        # [تحديث الموعد بطلب الإدارة] موعد قفل ميزة البطل يوم 28 يونيو الساعة 9 مساءً
+        # موعد قفل ميزة البطل يوم 28 يونيو الساعة 9 مساءً
         tournament_start_time = datetime(2026, 6, 28, 21, 0, tzinfo=ksa_tz)
         is_champ_locked = now_ksa >= tournament_start_time
         
+        # ==================== [العرض الجمالي المطور الفخم لتوقع بطل المونديال] ====================
+        champ_html_badge = f"<div class='champion-saved-badge'>🎯 توقعك الحالي: {FLAGS.get(current_champ, '🔮')} {current_champ}</div>" if current_champ else "<div class='champion-saved-badge' style='background:linear-gradient(90deg, #ff5252, #ff1744); color:white !important;'>⚠️ لم تختر بطلاً بعد!</div>"
+        
+        st.markdown(f"""
+        <div class="champion-box-card">
+            <h2 style="color: #FFD700; margin-bottom: 5px; font-weight: 900; font-size: clamp(22px, 5.5vw, 28px);">🏆 توقع ملك الذهب والبطولة 🏆</h2>
+            <p style="color: #cccccc; font-size: clamp(12px, 3.2vw, 14px); margin-bottom: 5px;">توقع المنتخب الذي سيرفع كأس العالم واكسب <b style="color:#FFD700;">+10 نقاط إضافية</b> تلقائياً في رصيدك!</p>
+            <p style="color: #ff9800; font-size: 12px; font-weight: bold; margin-bottom: 15px;">🔒 يقفل التوقع يوم 28 يونيو الساعة 9:00 مساءً</p>
+            {champ_html_badge}
+        </div>
+        """, unsafe_allow_html=True)
+        
         # تجهيز قائمة المنتخبات الفريدة المرتبة أبجدياً
         all_teams = sorted(list(FLAGS.keys()))
-        
         try:
             default_idx = all_teams.index(current_champ) if current_champ in all_teams else 0
         except ValueError:
             default_idx = 0
             
         selected_champ = st.selectbox(
-            "اختر المنتخب الذي سيتوج بالذهب 🏆:", 
+            "👑 اختر أو غيّر منتخبك الفائز باللقب الكوني:", 
             all_teams, 
             index=default_idx, 
             disabled=is_champ_locked,
@@ -500,10 +521,10 @@ else:
             if is_champ_locked:
                 st.error("🔒 مغلق! انتهت المهلة المحددة ولا يمكن تعديل البطل.")
             else:
-                if st.button("🎯 اعتماد وتثبيت بطل المونديال", key="save_champion_btn"):
+                if st.button("🎯 حفظ وتأمين خيار البطل", key="save_champion_btn"):
                     cursor.execute("UPDATE users SET champion_pred = ? WHERE phone = ?", (selected_champ, login_phone))
                     db_conn.commit()
-                    st.success(f"تم تسجيل {selected_champ} كبطل متوقع لك بنجاح! 🇸🇦🏆")
+                    st.success(f"تم تثبيت {selected_champ} بنجاح! 🔥")
                     st.rerun()
                     
         with c_champ_share:
@@ -511,12 +532,12 @@ else:
                 champ_flag = FLAGS.get(current_champ, '🏳️')
                 share_champ_text = f"👑 *تحدي ملك المونديال في الحديقة* 👑\n\n👤 *المشارك:* {user_name}\n🏆 *توقعي لبطل كأس العالم 2026 هو:*\n✨ *{current_champ} {champ_flag}* ✨\n\n#WC26_KING 🔥⚽️"
                 wa_champ_link = "https://wa.me/?text=" + urllib.parse.quote(share_champ_text)
-                st.link_button("📲 شارك بطل المونديال بالواتساب", wa_champ_link)
+                st.link_button("📲 مشاركة البطل بالواتساب", wa_champ_link)
             else:
-                st.info("💡 اعتمد البطل أولاً لتتمكن من مشاركته.")
+                st.info("💡 احفظ خيار البطل أولاً لمشاركته.")
                 
-        st.markdown("<hr style='border: 1px dashed rgba(255,215,0,0.3); margin: 30px 0;'>", unsafe_allow_html=True)
-        # ==============================================================================
+        st.markdown("<hr style='border: 1px dashed rgba(255,215,0,0.25); margin: 35px 0;'>", unsafe_allow_html=True)
+        # =======================================================================================
 
         st.subheader("⚽️⚒️ هنا التحدي يا متحدددي ")
         
@@ -592,7 +613,6 @@ else:
                         use_joker = st.checkbox("✌🏼 تفعيل دبلها لهذه المباراة (تدبيل النقاط!)", value=is_joker_checked, key=f"joker_{match['id']}")
                         
                         col_submit, col_share = st.columns(2)
-                        
                         with col_submit:
                             if st.button(f"اعتماد التوقع لمباراة {match['team_home']} × {match['team_away']}", key=f"btn_{match['id']}"):
                                 if use_joker and not is_joker_checked:
@@ -631,7 +651,7 @@ else:
             st.markdown('<div class="admin-card">⚙️ <b>لوحة تحكم الإدارة الملكية (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
             cursor = db_conn.cursor()
             
-            st.subheader("🧮 إدارة وإدخال نتائج المباريات")
+            st.subheader("🧮 إدارة وإدخل نتائج المباريات")
             match_options = {f"{m['team_home']} × {m['team_away']}": m for m in all_matches}
             selected_match_str = st.selectbox("إختر المباراة المستهدفة لإدخال/تعديل نتيجتها:", list(match_options.keys()))
             selected_match = match_options[selected_match_str]
