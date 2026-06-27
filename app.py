@@ -10,11 +10,11 @@ import urllib.parse
 ksa_tz = pytz.timezone('Asia/Riyadh')
 now_ksa = datetime.now(ksa_tz)
 
-st.set_page_config(page_title="⚽🏆 WC26 KING", page_icon="", layout="centered")
+st.set_page_config(page_title="⚽🏆 WC26 KING", page_icon="⚽", layout="centered")
 
 FLAGS = {
     "السعودية":"🇸🇦","الأرجنتين":"🇦🇷","البرازيل":"🇧🇷","فرنسا":"🇫🇷","ألمانيا":"🇩🇪",
-    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","اسكتلندا":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","المغرب":"🇲🇦",
+    "إسبانيا":"🇪🇸","البرتغال":"🇵🇹","إنجلترا":"🏴󠁧󠁢󠁥لنجليز","اسكتلندا":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","المغرب":"🇲🇦",
     "الجزائر":"🇩🇿","تونس":"🇹🇳","مصر":"🇪🇬","قطر":"🇶🇦","المكسيك":"🇲🇽",
     "الولايات المتحدة":"🇺🇸","كندا":"🇨🇦","أستراليا":"🇦🇺","تركيا":"🇹🇷","سويسرا":"🇨🇭",
     "التشيك":"🇨🇿","كوريا الجنوبية":"🇰🇷","باراغواي":"🇵🇾","هايتي":"🇭🇹","أوروغواي":"🇺🇾",
@@ -22,7 +22,7 @@ FLAGS = {
     "البوسنة والهرسك":"🇧🇦","الرأس الأخضر":"🇨🇻","السنغال":"🇸🇳","السويد":"🇸🇪","العراق":"🇮🇶",
     "الكونغو الديمقراطية":"🇨🇩","النرويج":"🇳🇴","النمسا":"🇦🇹","اليابان":"🇯🇵","بلجيكا":"🇧🇪",
     "بنما":"🇵🇦","جنوب أفريقيا":"🇿🇦","ساحل العاج":"🇨🇮","غانا":"🇬🇭","كرواتيا":"🇭🇷",
-    "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
+    "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هندا":"🇳🇱"
 }
 
 # تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
@@ -119,7 +119,7 @@ padding:25px;
     white-space: nowrap;
 }
 
-/* ستايل كرت توقع بطل المونديال - تم تعديله ليطابق كرت المباراة تماماً */
+/* ستايل كرت توقع بطل المونديال */
 .champion-box-card {
     background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(0, 77, 43, 0.4));
     border: 1px solid rgba(255,255,255,.2);
@@ -452,7 +452,6 @@ else:
             with col_rank: 
                 st.markdown(f"<div style='font-size: 18px; font-weight: bold; padding-top: 8px;'>{rank_icon}</div>", unsafe_allow_html=True)
             with col_name: 
-                # تعديل لعرض العلم فقط بجانب اسم المستخدم مباشرة بدون نصوص إضافية
                 if p_champ:
                     display_html = f"""
                     <div style='padding-top: 8px; font-size: 16px; font-weight: bold;'>
@@ -495,7 +494,6 @@ else:
         tournament_start_time = datetime(2026, 6, 28, 21, 0, tzinfo=ksa_tz)
         is_champ_locked = now_ksa >= tournament_start_time
         
-        # ==================== [عرض صندوق توقع البطل متناسق تماماً مع كروت المباريات] ====================
         champ_html_badge = f"<div class='champion-saved-badge'>🎯 توقعك الحالي: {FLAGS.get(current_champ, '🔮')} {current_champ}</div>" if current_champ else "<div class='champion-saved-badge' style='background:linear-gradient(90deg, #ff5252, #ff1744); color:white !important;'>⚠️ لم تختر بطلاً بعد</div>"
         
         st.markdown(f"""
@@ -542,7 +540,6 @@ else:
                 st.info("💡 احفظ خيار البطل أولاً لمشاركته.")
                 
         st.markdown("<hr style='border: 1px dashed rgba(255,215,0,0.25); margin: 35px 0;'>", unsafe_allow_html=True)
-        # =======================================================================================
 
         st.subheader("⚽️⚒️ هنا التحدي يا متحدددي ")
         
