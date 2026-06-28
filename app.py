@@ -25,127 +25,197 @@ FLAGS = {
     "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
 }
 
-# تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
+# تصميم واجهة المستخدم (CSS) - WC26 KING الإصدار الاحترافي
 st.markdown("""
 <style>
-.stApp{
-background:radial-gradient(circle at top,#14532d,#020806);
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+/* ── TOKENS ─────────────────────────────── */
+:root {
+  --gold:    #FFD700;
+  --gold-d:  #b8960a;
+  --green:   #00c853;
+  --green2:  #00e676;
+  --glass:   rgba(255,255,255,0.06);
+  --border:  rgba(255,255,255,0.10);
+  --text:    #e8f5e9;
+  --muted:   #7fada2;
+  --red:     #ff5252;
 }
 
-.main-title{
-color:#FFD700 !important;
-text-align:center;
-font-size:48px;
-font-weight:900;
-padding:25px;
-border-radius:30px;
-background:rgba(255,215,0,.15);
-box-shadow:0 0 35px rgba(255,215,0,.25);
+/* ── BASE ───────────────────────────────── */
+html, .stApp, [data-testid="stAppViewContainer"] {
+  font-family: 'Cairo', sans-serif !important;
+  background: radial-gradient(ellipse at 30% 0%, #0d2b14 0%, #06120a 65%) !important;
+  color: var(--text) !important;
+}
+[data-testid="stHeader"] { background: transparent !important; }
+[data-testid="stSidebar"] {
+  background: rgba(6,18,10,0.97) !important;
+  border-left: 1px solid var(--border);
+}
+p, label, div, span { color: var(--text) !important; }
+
+/* ── TITLE ──────────────────────────────── */
+.main-title { text-align: center; padding: 32px 20px 20px; }
+.main-title-badge {
+  display: inline-block;
+  background: rgba(255,215,0,0.10);
+  border: 1px solid rgba(255,215,0,0.30);
+  border-radius: 50px;
+  padding: 4px 16px;
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  color: var(--gold); margin-bottom: 12px; text-transform: uppercase;
+}
+.main-title h1 {
+  font-size: clamp(28px, 8vw, 54px); font-weight: 900;
+  color: var(--gold) !important; line-height: 1.1; margin: 0;
+  text-shadow: 0 0 40px rgba(255,215,0,0.35);
+}
+.main-title-sub { font-size: 14px; color: var(--muted) !important; margin-top: 6px; }
+.main-title-line {
+  width: 50px; height: 3px; margin: 14px auto 0;
+  background: linear-gradient(90deg, var(--green), var(--gold)); border-radius: 3px;
 }
 
-.stApp,p,label,div{
-color:white;
+/* ── TABS ───────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+  background: rgba(6,18,10,0.85) !important;
+  border-radius: 16px !important; border: 1px solid var(--border) !important;
+  padding: 4px !important; gap: 2px !important;
+}
+.stTabs [data-baseweb="tab"] {
+  background: transparent !important; border-radius: 12px !important;
+  color: var(--muted) !important; font-weight: 700 !important;
+  font-family: 'Cairo', sans-serif !important; padding: 8px 12px !important;
+}
+.stTabs [aria-selected="true"] {
+  background: rgba(255,215,0,0.12) !important; color: var(--gold) !important;
+  box-shadow: 0 0 0 1px rgba(255,215,0,0.30) !important;
+}
+.stTabs [data-baseweb="tab-highlight"] { display: none !important; }
+
+/* ── BUTTONS ────────────────────────────── */
+.stButton > button {
+  width: 100% !important; height: 46px !important;
+  border-radius: 14px !important; border: none !important;
+  background: linear-gradient(90deg, var(--green), var(--green2)) !important;
+  color: #fff !important; font-weight: 700 !important;
+  font-family: 'Cairo', sans-serif !important; font-size: 14px !important;
+  transition: opacity .15s, transform .1s !important;
+  box-shadow: 0 4px 16px rgba(0,200,83,0.20) !important;
+}
+.stButton > button:hover {
+  background: linear-gradient(90deg, var(--gold-d), var(--gold)) !important;
+  color: #000 !important; box-shadow: 0 4px 20px rgba(255,215,0,0.28) !important;
+}
+.stButton > button:active { transform: scale(0.97) !important; }
+
+.stLinkButton > a {
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  width: 100% !important; height: 46px !important; border-radius: 14px !important;
+  border: 1px solid rgba(37,211,102,0.35) !important;
+  background: rgba(37,211,102,0.10) !important; color: var(--green2) !important;
+  font-weight: 700 !important; font-family: 'Cairo', sans-serif !important;
+  font-size: 13px !important; text-decoration: none !important;
+}
+.stLinkButton > a:hover { background: rgba(37,211,102,0.18) !important; }
+
+/* ── INPUTS ─────────────────────────────── */
+[data-testid="stNumberInput"] input,
+[data-testid="stTextInput"] input,
+[data-testid="stPasswordInput"] input {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid var(--border) !important; border-radius: 12px !important;
+  color: var(--text) !important; font-family: 'Cairo', sans-serif !important;
+  font-size: 16px !important; font-weight: 700 !important; text-align: center !important;
+}
+[data-testid="stNumberInput"] input:focus,
+[data-testid="stTextInput"] input:focus {
+  border-color: var(--gold) !important; box-shadow: 0 0 0 2px rgba(255,215,0,0.15) !important;
 }
 
-.match-card{
-background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
-border-radius:30px;
-padding:25px;
-margin:20px 0;
-border:1px solid rgba(255,255,255,.2);
-box-shadow:0 15px 40px rgba(0,0,0,.45);
+/* ── MATCH CARD ─────────────────────────── */
+.match-card {
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 20px; padding: 16px 14px; margin: 8px 0 14px;
+  position: relative; overflow: hidden;
+}
+.match-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(255,215,0,0.45), transparent);
+}
+.match-card h4 {
+  color: var(--gold) !important; text-align: center;
+  font-size: clamp(17px, 4.5vw, 23px); font-weight: 900; margin-bottom: 5px;
 }
 
-.match-card h4{
-color:#FFD700 !important;
-text-align:center;
-font-size:26px;
-}
-
-.stButton button{
-width:100%;
-height:48px;
-border-radius:18px;
-border:none;
-background:linear-gradient(90deg,#00c853,#00e676);
-color:white;
-font-weight:bold;
-}
-
-.stButton button:hover{
-background:linear-gradient(90deg,#FFD700,#ff9800);
-color:black;
-}
-
-.admin-card{
-background:linear-gradient(135deg,#5b3200,#b8860b);
-border-radius:25px;
-padding:25px;
-}
-
-.review-card{
-background:linear-gradient(135deg,#004d2b,#00a85a);
-border-radius:25px;
-padding:25px;
-}
-
-/* ستايل مخصص لكروت الإحصائيات */
+/* ── STATS CONTAINER ────────────────────── */
 .stats-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 15px;
-    direction: rtl;
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 8px; margin-bottom: 16px; direction: rtl;
 }
 .stat-box {
-    flex: 1;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 8px 4px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  background: var(--glass); border: 1px solid var(--border);
+  border-radius: 14px; padding: 11px 6px; text-align: center;
 }
 .stat-box-label {
-    font-size: clamp(10px, 2.5vw, 13px);
-    color: #b3b3b3;
-    margin-bottom: 2px;
-    white-space: nowrap;
+  font-size: clamp(10px,2.5vw,12px); color: var(--muted) !important;
+  margin-bottom: 3px; white-space: nowrap;
 }
 .stat-box-value {
-    font-size: clamp(14px, 3.5vw, 18px);
-    font-weight: bold;
-    color: #FFD700;
-    white-space: nowrap;
+  font-size: clamp(14px,3.5vw,19px); font-weight: 900;
+  color: var(--gold) !important; white-space: nowrap;
 }
 
-/* ستايل كرت توقع بطل المونديال */
+/* ── CHAMPION CARD ───────────────────────── */
 .champion-box-card {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(0, 77, 43, 0.4));
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 30px;
-    padding: 25px;
-    margin: 20px 0;
-    box-shadow: 0 15px 40px rgba(0,0,0,.45);
-    text-align: center;
+  background: linear-gradient(135deg, rgba(255,215,0,0.09), rgba(0,77,43,0.30));
+  border: 1px solid rgba(255,215,0,0.22); border-radius: 22px;
+  padding: 22px 16px; margin: 14px 0 18px; text-align: center;
+}
+.champion-box-card h2 {
+  color: var(--gold) !important;
+  font-size: clamp(17px,5vw,23px); font-weight: 900; margin-bottom: 5px;
 }
 .champion-saved-badge {
-    background: linear-gradient(90deg, #FFD700, #ffa726);
-    color: #000000 !important;
-    font-weight: 900;
-    font-size: 16px;
-    padding: 6px 18px;
-    border-radius: 50px;
-    display: inline-block;
-    margin-top: 10px;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  background: linear-gradient(90deg, var(--gold-d), var(--gold));
+  color: #000 !important; font-weight: 900; font-size: 14px;
+  padding: 7px 20px; border-radius: 50px; display: inline-block;
+  margin-top: 10px; box-shadow: 0 4px 14px rgba(255,215,0,0.22);
 }
+
+/* ── ADMIN / REVIEW CARDS ───────────────── */
+.admin-card {
+  background: linear-gradient(135deg, rgba(91,50,0,0.55), rgba(184,134,11,0.35));
+  border: 1px solid rgba(184,134,11,0.30); border-radius: 18px; padding: 18px; margin-bottom: 14px;
+}
+.review-card {
+  background: linear-gradient(135deg, rgba(0,77,43,0.45), rgba(0,168,90,0.25));
+  border: 1px solid rgba(0,168,90,0.25); border-radius: 18px; padding: 16px; margin-bottom: 12px;
+}
+
+/* ── DATAFRAME ───────────────────────────── */
+[data-testid="stDataFrame"] { border-radius: 14px !important; overflow: hidden; border: 1px solid var(--border) !important; }
+[data-testid="stDataFrame"] th { background: rgba(255,215,0,0.08) !important; color: var(--gold) !important; font-weight: 700 !important; }
+[data-testid="stDataFrame"] td { color: var(--text) !important; background: rgba(255,255,255,0.03) !important; }
+
+/* ── ALERTS ─────────────────────────────── */
+[data-testid="stAlert"] { border-radius: 14px !important; border: none !important; }
+
+/* ── SCROLLBAR ───────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.22); border-radius: 4px; }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="main-title">
-WC26 KING 🇸🇦🏆⚽️
+  <div class="main-title-badge">🇸🇦 كأس العالم 2026</div>
+  <h1>WC26 KING 🏆</h1>
+  <div class="main-title-sub">تحدي ملك المونديال في الحديقة ⚽️</div>
+  <div class="main-title-line"></div>
 </div>
 """, unsafe_allow_html=True)
 
