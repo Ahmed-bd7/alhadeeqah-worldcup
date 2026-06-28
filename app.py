@@ -541,7 +541,7 @@ if not st.session_state["is_logged_in"]:
                             st.balloons()
             st.markdown('</div>', unsafe_allow_html=True)
         else:
-            st.markdown('<div class="auth-card"><div class="auth-card-title">  🇸🇦👋 هلا فيكم ارحببووو</div>', unsafe_allow_html=True)
+
             login_phone = st.text_input("📱 رقم الجوال", max_chars=10)
             login_pass  = st.text_input("🔐 كلمة المرور", type="password")
             if st.button("تسجيل الدخول 🚀"):
