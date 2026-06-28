@@ -686,6 +686,7 @@ else:
         st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
 
     # --- تبويب الإدارة والتحكم الفوري والمحسّن (خاص بأحمد بادحمان) ---
+    # --- تبويب الإدارة والتحكم الفوري والمحسّن (خاص بأحمد بادحمان) ---
     if login_phone == ADMIN_PHONE:
         with tab_admin:
             st.markdown('<div class="admin-card">⚙️ <b>لوحة تحكم الإدارة الملكية (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
@@ -749,6 +750,7 @@ else:
                 st.success("🏆 تم احتساب النقاط بنجاح طبقاً للنظام الجديد (12 نقطة مع الجوكر للتعادل الشامل)!")
                 st.rerun()
 
+            st.write("---")  # خط فاصل لتنظيم الواجهة
             st.subheader("🛠️ شاشة إدارة قاعدة البيانات الفورية")
             cursor.execute("SELECT name, phone, points, password FROM users")
             all_users_list = cursor.fetchall()
