@@ -25,127 +25,604 @@ FLAGS = {
     "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
 }
 
-# تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
+# ============================================================
+# CSS — WC26 KING  |  Mobile-First Immersive Redesign
+# ============================================================
 st.markdown("""
 <style>
-.stApp{
-background:radial-gradient(circle at top,#14532d,#020806);
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+/* ── TOKENS ─────────────────────────────────────────────── */
+:root {
+  --gold:        #FFD700;
+  --gold2:       #FFA500;
+  --gold-glow:   rgba(255,215,0,.35);
+  --green-bg:    #030C05;
+  --green-dark:  #071A09;
+  --green-card:  rgba(10,40,15,.75);
+  --green-mid:   #0F3318;
+  --accent:      #00E676;
+  --accent2:     #00C853;
+  --red:         #FF5252;
+  --white:       #EFF5EF;
+  --muted:       rgba(255,255,255,.45);
+  --border-gold: rgba(255,215,0,.18);
+  --border-card: rgba(255,255,255,.07);
+  --r-card:      18px;
+  --r-btn:       14px;
+  --font:        'Cairo', sans-serif;
 }
 
-.main-title{
-color:#FFD700 !important;
-text-align:center;
-font-size:48px;
-font-weight:900;
-padding:25px;
-border-radius:30px;
-background:rgba(255,215,0,.15);
-box-shadow:0 0 35px rgba(255,215,0,.25);
+/* ── RESET ───────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+/* ── APP BACKGROUND — شبكة ملعب ──────────────────────────── */
+.stApp {
+  background-color: var(--green-bg);
+  background-image:
+    /* شعاع مركزي */
+    radial-gradient(ellipse 80% 55% at 50% -10%,
+      rgba(0,150,50,.22) 0%, transparent 70%),
+    /* خطوط أفقية ملعب */
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 58px,
+      rgba(255,255,255,.028) 58px,
+      rgba(255,255,255,.028) 60px
+    ),
+    /* خطوط رأسية */
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 58px,
+      rgba(255,255,255,.018) 58px,
+      rgba(255,255,255,.018) 60px
+    );
+  font-family: var(--font) !important;
+  direction: rtl;
+  min-height: 100vh;
 }
 
-.stApp,p,label,div{
-color:white;
+/* ── HIDE STREAMLIT CHROME ───────────────────────────────── */
+#MainMenu, footer, header,
+[data-testid="stToolbar"],
+.stDeployButton { display: none !important; }
+
+/* ── GLOBAL TEXT ─────────────────────────────────────────── */
+.stApp, .stApp p, .stApp label,
+.stApp div, .stApp span,
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font) !important;
+  color: var(--white);
 }
 
-.match-card{
-background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
-border-radius:30px;
-padding:25px;
-margin:20px 0;
-border:1px solid rgba(255,255,255,.2);
-box-shadow:0 15px 40px rgba(0,0,0,.45);
+/* ── MAIN CONTAINER width ────────────────────────────────── */
+.block-container {
+  padding: 0 12px 60px !important;
+  max-width: 640px !important;
 }
 
-.match-card h4{
-color:#FFD700 !important;
-text-align:center;
-font-size:26px;
+/* ══════════════════════════════════════════════════════════
+   HERO TITLE
+══════════════════════════════════════════════════════════ */
+.main-title {
+  text-align: center;
+  padding: 28px 16px 22px;
+  position: relative;
+}
+.main-title-trophy {
+  display: block;
+  font-size: clamp(36px, 11vw, 64px);
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1.05;
+  text-shadow:
+    0 0 24px var(--gold-glow),
+    0 0 56px rgba(255,215,0,.18),
+    0 3px 6px rgba(0,0,0,.6);
+  letter-spacing: 1px;
+}
+.main-title-sub {
+  display: block;
+  margin-top: 7px;
+  font-size: clamp(11px, 3.2vw, 14px);
+  font-weight: 600;
+  color: rgba(255,215,0,.55);
+  letter-spacing: 3px;
+}
+.main-title-line {
+  width: 90px; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 12px auto 0;
+  border-radius: 2px;
 }
 
-.stButton button{
-width:100%;
-height:48px;
-border-radius:18px;
-border:none;
-background:linear-gradient(90deg,#00c853,#00e676);
-color:white;
-font-weight:bold;
+/* ══════════════════════════════════════════════════════════
+   TABS — pill style, scrollable on mobile
+══════════════════════════════════════════════════════════ */
+.stTabs [data-baseweb="tab-list"] {
+  background: rgba(0,0,0,.45) !important;
+  border-radius: 50px !important;
+  padding: 5px !important;
+  border: 1px solid var(--border-gold) !important;
+  gap: 3px !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  flex-wrap: nowrap !important;
+}
+.stTabs [data-baseweb="tab-list"]::-webkit-scrollbar { display: none; }
+
+.stTabs [data-baseweb="tab"] {
+  background: transparent !important;
+  border-radius: 50px !important;
+  color: var(--muted) !important;
+  font-family: var(--font) !important;
+  font-weight: 700 !important;
+  font-size: clamp(11px, 3.2vw, 13px) !important;
+  padding: 7px 13px !important;
+  border: none !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  transition: color .2s !important;
+}
+.stTabs [aria-selected="true"] {
+  background: linear-gradient(135deg, rgba(255,215,0,.22), rgba(255,165,0,.1)) !important;
+  color: var(--gold) !important;
+  box-shadow: 0 0 0 1px rgba(255,215,0,.28) !important;
+}
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════
+   MATCH CARD
+══════════════════════════════════════════════════════════ */
+.match-card {
+  background: var(--green-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--r-card);
+  padding: 18px 14px 14px;
+  margin: 12px 0;
+  border: 1px solid var(--border-gold);
+  box-shadow:
+    0 2px 16px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  position: relative;
+  overflow: hidden;
+}
+/* خط ذهبي علوي */
+.match-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 12%; right: 12%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  border-radius: 0 0 4px 4px;
+  opacity: .55;
+}
+.match-card h4 {
+  color: var(--gold) !important;
+  text-align: center;
+  font-size: clamp(17px, 4.5vw, 22px) !important;
+  font-weight: 900 !important;
+  margin-bottom: 6px !important;
 }
 
-.stButton button:hover{
-background:linear-gradient(90deg,#FFD700,#ff9800);
-color:black;
-}
-
-.admin-card{
-background:linear-gradient(135deg,#5b3200,#b8860b);
-border-radius:25px;
-padding:25px;
-}
-
-.review-card{
-background:linear-gradient(135deg,#004d2b,#00a85a);
-border-radius:25px;
-padding:25px;
-}
-
-/* ستايل مخصص لكروت الإحصائيات */
+/* ══════════════════════════════════════════════════════════
+   STATS BOXES
+══════════════════════════════════════════════════════════ */
 .stats-container {
-    display: flex;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 15px;
-    direction: rtl;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+  direction: rtl;
 }
 .stat-box {
-    flex: 1;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 8px 4px;
-    text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  background: linear-gradient(160deg, rgba(20,70,30,.55), rgba(5,20,8,.7));
+  border: 1px solid var(--border-gold);
+  border-radius: 14px;
+  padding: 12px 4px;
+  text-align: center;
+  box-shadow: 0 3px 12px rgba(0,0,0,.3);
 }
 .stat-box-label {
-    font-size: clamp(10px, 2.5vw, 13px);
-    color: #b3b3b3;
-    margin-bottom: 2px;
-    white-space: nowrap;
+  font-size: clamp(9px, 2.4vw, 11px);
+  color: var(--muted);
+  margin-bottom: 5px;
+  font-weight: 600;
+  white-space: nowrap;
 }
 .stat-box-value {
-    font-size: clamp(14px, 3.5vw, 18px);
-    font-weight: bold;
-    color: #FFD700;
-    white-space: nowrap;
+  font-size: clamp(15px, 4.5vw, 21px);
+  font-weight: 900;
+  color: var(--gold);
+  white-space: nowrap;
+  text-shadow: 0 0 10px var(--gold-glow);
 }
 
-/* ستايل كرت توقع بطل المونديال */
+/* ══════════════════════════════════════════════════════════
+   CHAMPION BOX
+══════════════════════════════════════════════════════════ */
 .champion-box-card {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(0, 77, 43, 0.4));
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 30px;
-    padding: 25px;
-    margin: 20px 0;
-    box-shadow: 0 15px 40px rgba(0,0,0,.45);
-    text-align: center;
+  background: linear-gradient(145deg,
+    rgba(18,70,35,.5) 0%,
+    rgba(6,15,8,.75) 100%);
+  border: 1px solid rgba(255,215,0,.28);
+  border-radius: 22px;
+  padding: 24px 18px 20px;
+  margin: 16px 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 32px rgba(0,0,0,.5);
+}
+.champion-box-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold2), transparent);
+  opacity: .7;
+}
+.champion-box-card::after {
+  content: '🏆';
+  position: absolute;
+  bottom: -18px; left: -12px;
+  font-size: 90px;
+  opacity: .045;
+  transform: rotate(-12deg);
 }
 .champion-saved-badge {
-    background: linear-gradient(90deg, #FFD700, #ffa726);
-    color: #000000 !important;
-    font-weight: 900;
-    font-size: 16px;
-    padding: 6px 18px;
-    border-radius: 50px;
-    display: inline-block;
-    margin-top: 10px;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  color: #080E08 !important;
+  font-weight: 900;
+  font-size: clamp(12px, 3.5vw, 15px);
+  padding: 7px 20px;
+  border-radius: 50px;
+  display: inline-block;
+  margin-top: 10px;
+  box-shadow: 0 4px 18px var(--gold-glow);
+}
+
+/* ══════════════════════════════════════════════════════════
+   BUTTONS — mobile tap-friendly (min 48px)
+══════════════════════════════════════════════════════════ */
+.stButton > button {
+  width: 100% !important;
+  min-height: 48px !important;
+  border-radius: var(--r-btn) !important;
+  border: none !important;
+  background: linear-gradient(135deg, #165C2A 0%, var(--accent2) 100%) !important;
+  color: #fff !important;
+  font-family: var(--font) !important;
+  font-weight: 700 !important;
+  font-size: clamp(13px, 3.5vw, 15px) !important;
+  box-shadow: 0 4px 14px rgba(0,200,83,.22) !important;
+  transition: filter .18s, transform .12s !important;
+  -webkit-tap-highlight-color: transparent;
+}
+.stButton > button:active {
+  transform: scale(.97) !important;
+  filter: brightness(.9) !important;
+}
+/* زر الخروج في الـ sidebar — رمادي */
+[data-testid="stSidebar"] .stButton > button {
+  background: rgba(255,255,255,.08) !important;
+  color: var(--muted) !important;
+  box-shadow: none !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   INPUTS
+══════════════════════════════════════════════════════════ */
+.stTextInput input,
+.stNumberInput input,
+input[type="text"], input[type="password"] {
+  background: rgba(255,255,255,.055) !important;
+  border: 1px solid rgba(255,215,0,.2) !important;
+  border-radius: 12px !important;
+  color: var(--white) !important;
+  font-family: var(--font) !important;
+  font-size: 15px !important;
+  min-height: 48px !important;
+  padding: 0 14px !important;
+  transition: border-color .2s !important;
+  -webkit-appearance: none;
+}
+.stTextInput input:focus,
+.stNumberInput input:focus {
+  border-color: rgba(255,215,0,.55) !important;
+  box-shadow: 0 0 0 3px rgba(255,215,0,.07) !important;
+  outline: none !important;
+}
+/* label */
+.stTextInput label, .stNumberInput label,
+.stSelectbox label, .stCheckbox label span,
+.stRadio label span {
+  color: rgba(255,255,255,.7) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   NUMBER INPUT — أزرار + / -  كبيرة للجوال
+══════════════════════════════════════════════════════════ */
+.stNumberInput [data-testid="stNumberInputContainer"] {
+  gap: 6px !important;
+}
+.stNumberInput button {
+  background: rgba(255,215,0,.13) !important;
+  border: 1px solid rgba(255,215,0,.22) !important;
+  border-radius: 10px !important;
+  color: var(--gold) !important;
+  min-width: 44px !important;
+  min-height: 44px !important;
+  font-size: 20px !important;
+  font-weight: 900 !important;
+}
+.stNumberInput button:active {
+  background: rgba(255,215,0,.28) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SELECTBOX
+══════════════════════════════════════════════════════════ */
+[data-baseweb="select"] > div {
+  background: rgba(255,255,255,.055) !important;
+  border: 1px solid rgba(255,215,0,.2) !important;
+  border-radius: 12px !important;
+  min-height: 48px !important;
+}
+[data-baseweb="select"] span { color: var(--white) !important; }
+[data-baseweb="popover"] {
+  background: #0C2410 !important;
+  border: 1px solid var(--border-gold) !important;
+  border-radius: 14px !important;
+}
+[data-baseweb="menu"] li {
+  color: var(--white) !important;
+  font-family: var(--font) !important;
+  padding: 10px 14px !important;
+}
+[data-baseweb="menu"] li:hover {
+  background: rgba(255,215,0,.1) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RADIO
+══════════════════════════════════════════════════════════ */
+.stRadio > div {
+  gap: 8px !important;
+  flex-direction: row !important;
+  flex-wrap: wrap;
+}
+.stRadio label {
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,215,0,.15) !important;
+  border-radius: 50px !important;
+  padding: 9px 18px !important;
+  min-height: 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  cursor: pointer;
+  transition: all .18s !important;
+}
+.stRadio label:hover,
+.stRadio label[data-checked="true"] {
+  background: rgba(255,215,0,.1) !important;
+  border-color: rgba(255,215,0,.4) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   CHECKBOX — JOKER
+══════════════════════════════════════════════════════════ */
+.stCheckbox > label {
+  background: rgba(255,215,0,.06) !important;
+  border: 1px solid rgba(255,215,0,.22) !important;
+  border-radius: 14px !important;
+  padding: 12px 16px !important;
+  min-height: 50px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  width: 100% !important;
+  cursor: pointer;
+  transition: background .18s !important;
+}
+.stCheckbox > label:hover {
+  background: rgba(255,215,0,.12) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   TOGGLE
+══════════════════════════════════════════════════════════ */
+.stToggle > label {
+  background: rgba(255,255,255,.05) !important;
+  border: 1px solid rgba(255,215,0,.15) !important;
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  min-height: 46px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ALERTS
+══════════════════════════════════════════════════════════ */
+div[data-testid="stAlert"] {
+  border-radius: 14px !important;
+  font-family: var(--font) !important;
+  font-size: 14px !important;
+}
+[data-testid="stAlert"][data-baseweb="notification"][kind="positive"],
+.stSuccess {
+  background: rgba(0,200,83,.1) !important;
+  border-left: 4px solid var(--accent2) !important;
+}
+[data-testid="stAlert"][data-baseweb="notification"][kind="negative"],
+.stError {
+  background: rgba(255,82,82,.1) !important;
+  border-left: 4px solid var(--red) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DATAFRAME
+══════════════════════════════════════════════════════════ */
+.stDataFrame {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  border: 1px solid var(--border-gold) !important;
+  font-size: 13px !important;
+}
+.stDataFrame thead tr th {
+  background: rgba(255,215,0,.1) !important;
+  color: var(--gold) !important;
+  font-weight: 700 !important;
+  font-family: var(--font) !important;
+  white-space: nowrap !important;
+}
+.stDataFrame tbody tr:nth-child(even) td {
+  background: rgba(255,255,255,.025) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   FORM
+══════════════════════════════════════════════════════════ */
+[data-testid="stForm"] {
+  background: rgba(255,255,255,.03);
+  border: 1px solid var(--border-gold);
+  border-radius: 20px;
+  padding: 18px 14px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════════════════ */
+[data-testid="stSidebar"] {
+  background: linear-gradient(180deg, #060F07 0%, #0A1F0E 100%) !important;
+  border-left: 1px solid rgba(255,215,0,.1) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   LINK BUTTON (واتساب)
+══════════════════════════════════════════════════════════ */
+.stLinkButton a {
+  background: linear-gradient(135deg, #005A1F, #00913A) !important;
+  color: #fff !important;
+  border-radius: var(--r-btn) !important;
+  border: 1px solid rgba(0,200,83,.25) !important;
+  font-family: var(--font) !important;
+  font-weight: 700 !important;
+  font-size: clamp(13px, 3.5vw, 14px) !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-decoration: none !important;
+  padding: 0 14px !important;
+  box-shadow: 0 4px 12px rgba(0,145,58,.2) !important;
+  transition: filter .18s !important;
+}
+.stLinkButton a:active { filter: brightness(.88) !important; }
+
+/* ══════════════════════════════════════════════════════════
+   JOKER BADGE
+══════════════════════════════════════════════════════════ */
+.joker-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: linear-gradient(135deg,
+    rgba(255,215,0,.1), rgba(255,140,0,.08));
+  border: 1px solid rgba(255,215,0,.3);
+  border-radius: 16px;
+  padding: 13px 16px;
+  font-size: clamp(14px, 4vw, 17px);
+  font-weight: 800;
+  color: var(--gold);
+  text-shadow: 0 0 10px var(--gold-glow);
+  margin-bottom: 18px;
+  width: 100%;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ADMIN / REVIEW CARDS
+══════════════════════════════════════════════════════════ */
+.admin-card {
+  background: linear-gradient(135deg,
+    rgba(80,40,0,.45), rgba(160,110,0,.2));
+  border: 1px solid rgba(180,130,0,.35);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+.review-card {
+  background: linear-gradient(135deg,
+    rgba(0,65,35,.45), rgba(0,140,70,.18));
+  border: 1px solid rgba(0,180,80,.25);
+  border-radius: 18px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DIVIDER & HEADINGS
+══════════════════════════════════════════════════════════ */
+hr {
+  border: none !important;
+  border-top: 1px solid rgba(255,215,0,.1) !important;
+  margin: 18px 0 !important;
+}
+h2, h3 {
+  color: var(--white) !important;
+  font-family: var(--font) !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SCROLLBAR
+══════════════════════════════════════════════════════════ */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(255,215,0,.2);
+  border-radius: 4px;
+}
+
+/* ══════════════════════════════════════════════════════════
+   MOBILE OVERRIDES  (< 480px)
+══════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {
+  .block-container { padding: 0 8px 70px !important; }
+
+  .stTabs [data-baseweb="tab"] {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+
+  .match-card { padding: 14px 10px 12px; }
+
+  .stats-container { gap: 6px; }
+  .stat-box { padding: 10px 2px; border-radius: 11px; }
+
+  /* الأعمدة تكدس عمودياً على الموبايل الصغير */
+  [data-testid="column"] { min-width: 0 !important; }
+
+  .stButton > button { font-size: 13px !important; min-height: 46px !important; }
+  .stLinkButton a   { font-size: 13px !important; min-height: 46px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="main-title">
-WC26 KING 🇸🇦🏆⚽️
+    <div class="main-title-inner">
+        <span class="main-title-trophy">🏆 WC26 KING</span>
+        <span class="main-title-sub">🇸🇦  تحدي ملك المونديال  🇺🇸 🇨🇦</span>
+        <div class="main-title-line"></div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -557,8 +1034,11 @@ else:
         remaining_jokers = max(0, 8 - used_jokers)
         
         st.markdown(f"""
-        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700; border-radius: 15px; padding: 15px; text-align: center; margin-bottom: 20px;">
-            <span style="font-size: 20px; font-weight: bold; color: #FFD700;">✌🏼 رصيد دبلها المتبقي: {remaining_jokers} من 8 </span>
+        <div class="joker-badge">
+            <span>✌🏼</span>
+            <span>رصيد دبلها المتبقي:</span>
+            <span style="font-size: 1.3em; color: {'#FFD700' if remaining_jokers > 2 else '#FF6B35'};">{remaining_jokers}</span>
+            <span style="color: rgba(255,215,0,0.5); font-weight: 600;">/ 8</span>
         </div>
         """, unsafe_allow_html=True)
 
