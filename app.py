@@ -685,8 +685,7 @@ else:
             })
         st.dataframe(pd.DataFrame(rows), hide_index=True, use_container_width=True)
 
-    # --- 4. لوحة الإدارة الفاخرة والآمنة (أحمد بادحمان) ---
-        # --- تبويب الإدارة والتحكم الفوري والمحسّن (خاص بأحمد بادحمان) ---
+    # --- تبويب الإدارة والتحكم الفوري والمحسّن (خاص بأحمد بادحمان) ---
     if login_phone == ADMIN_PHONE:
         with tab_admin:
             st.markdown('<div class="admin-card">⚙️ <b>لوحة تحكم الإدارة الملكية (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
