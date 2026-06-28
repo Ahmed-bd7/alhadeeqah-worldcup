@@ -783,7 +783,7 @@ else:
                 txt_p = f" (ترجيح: {actual_p})" if actual_p else ""
                 st.markdown(f"""
                 <div class="match-card done">
-                  <div class="match-meta">📅 {match['time'].strftime('%d يونيو | %I:%M %p')}</div>
+                  <div class="match-meta">📅 {match['time'].strftime('%d | %I:%M %p')}</div>
                   <div class="match-teams">
                     <div class="team-side"><span class="team-flag">{home_flag}</span><div class="team-name">{match['team_home']}</div></div>
                     <div class="match-score">{actual_h} × {actual_a}{txt_p}</div>
