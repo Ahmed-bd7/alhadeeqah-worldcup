@@ -25,127 +25,528 @@ FLAGS = {
     "كوراساو":"🇨🇼","كولومبيا":"🇨🇴","نيوزيلندا":"🇳🇿","هولندا":"🇳🇱"
 }
 
-# تصميم واجهة المستخدم (CSS) - هوية الحديقة الملكية
+# تصميم واجهة المستخدم (CSS) - WC26 KING Premium Edition
 st.markdown("""
 <style>
-.stApp{
-background:radial-gradient(circle at top,#14532d,#020806);
+/* ===== GOOGLE FONTS ===== */
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+/* ===== ROOT VARIABLES ===== */
+:root {
+    --gold: #FFD700;
+    --gold-light: #FFE866;
+    --gold-dark: #B8860B;
+    --green-deep: #0A1F0E;
+    --green-mid: #0D2B12;
+    --green-field: #1A5C28;
+    --green-bright: #00C853;
+    --white: #F0F4F0;
+    --grey: #8A9E8D;
+    --card-bg: rgba(255,255,255,0.05);
+    --card-border: rgba(255,215,0,0.15);
+    --shadow: 0 8px 32px rgba(0,0,0,0.5);
 }
 
-.main-title{
-color:#FFD700 !important;
-text-align:center;
-font-size:48px;
-font-weight:900;
-padding:25px;
-border-radius:30px;
-background:rgba(255,215,0,.15);
-box-shadow:0 0 35px rgba(255,215,0,.25);
+/* ===== GLOBAL RESET & BASE ===== */
+* { box-sizing: border-box; }
+
+.stApp {
+    background: linear-gradient(160deg, #051209 0%, #0A2210 35%, #0D1F0C 65%, #040D05 100%);
+    font-family: 'Cairo', sans-serif !important;
+    min-height: 100vh;
+    direction: rtl;
 }
 
-.stApp,p,label,div{
-color:white;
+/* خلفية ملعب كرة قدم خفية */
+.stApp::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
 }
 
-.match-card{
-background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.04));
-border-radius:30px;
-padding:25px;
-margin:20px 0;
-border:1px solid rgba(255,255,255,.2);
-box-shadow:0 15px 40px rgba(0,0,0,.45);
+/* ===== HIDE STREAMLIT DEFAULTS ===== */
+#MainMenu, footer, header { visibility: hidden; }
+.stDeployButton { display: none; }
+[data-testid="stToolbar"] { display: none; }
+
+/* ===== TYPOGRAPHY ===== */
+.stApp, p, label, div, span, h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cairo', sans-serif !important;
+    color: var(--white);
 }
 
-.match-card h4{
-color:#FFD700 !important;
-text-align:center;
-font-size:26px;
+/* ===== MAIN TITLE ===== */
+.main-title {
+    text-align: center;
+    padding: 30px 20px 25px;
+    margin-bottom: 8px;
+    position: relative;
 }
 
-.stButton button{
-width:100%;
-height:48px;
-border-radius:18px;
-border:none;
-background:linear-gradient(90deg,#00c853,#00e676);
-color:white;
-font-weight:bold;
+.main-title-inner {
+    display: inline-block;
+    position: relative;
 }
 
-.stButton button:hover{
-background:linear-gradient(90deg,#FFD700,#ff9800);
-color:black;
+.main-title-trophy {
+    font-size: clamp(42px, 10vw, 72px);
+    font-weight: 900;
+    color: var(--gold);
+    text-shadow:
+        0 0 30px rgba(255,215,0,0.6),
+        0 0 60px rgba(255,215,0,0.3),
+        0 4px 8px rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+    display: block;
+    line-height: 1.1;
 }
 
-.admin-card{
-background:linear-gradient(135deg,#5b3200,#b8860b);
-border-radius:25px;
-padding:25px;
+.main-title-sub {
+    font-size: clamp(13px, 3vw, 16px);
+    font-weight: 600;
+    color: rgba(255,215,0,0.65);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 6px;
 }
 
-.review-card{
-background:linear-gradient(135deg,#004d2b,#00a85a);
-border-radius:25px;
-padding:25px;
+.main-title-line {
+    width: 120px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 14px auto 0;
+    border-radius: 2px;
 }
 
-/* ستايل مخصص لكروت الإحصائيات */
+/* ===== TABS ===== */
+.stTabs [data-baseweb="tab-list"] {
+    background: rgba(0,0,0,0.3) !important;
+    border-radius: 16px !important;
+    padding: 6px !important;
+    border: 1px solid rgba(255,215,0,0.1) !important;
+    gap: 4px !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: transparent !important;
+    border-radius: 12px !important;
+    color: rgba(255,255,255,0.55) !important;
+    font-family: 'Cairo', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 13px !important;
+    padding: 8px 14px !important;
+    border: none !important;
+    transition: all 0.25s ease !important;
+}
+
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,215,0,0.08)) !important;
+    color: var(--gold) !important;
+    box-shadow: 0 0 0 1px rgba(255,215,0,0.3) !important;
+}
+
+.stTabs [data-baseweb="tab-highlight"] { display: none !important; }
+.stTabs [data-baseweb="tab-border"] { display: none !important; }
+
+/* ===== MATCH CARD ===== */
+.match-card {
+    background: linear-gradient(145deg, rgba(26,92,40,0.2) 0%, rgba(10,31,14,0.6) 100%);
+    border-radius: 20px;
+    padding: 22px 20px 18px;
+    margin: 16px 0;
+    border: 1px solid rgba(255,215,0,0.15);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.match-card::before {
+    content: '⚽';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    font-size: 60px;
+    opacity: 0.04;
+    transform: rotate(-15deg);
+}
+
+.match-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,215,0,0.2);
+}
+
+.match-card h4 {
+    color: var(--gold) !important;
+    text-align: center;
+    font-size: clamp(20px, 4.5vw, 26px) !important;
+    font-weight: 900 !important;
+    margin-bottom: 8px !important;
+}
+
+/* ===== LEADERBOARD ===== */
+.leaderboard-row {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 10px 16px;
+    margin: 6px 0;
+    transition: background 0.2s ease;
+}
+
+.leaderboard-row:hover {
+    background: rgba(255,215,0,0.06);
+    border-color: rgba(255,215,0,0.15);
+}
+
+/* ===== STATS BOXES ===== */
 .stats-container {
     display: flex;
     justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 15px;
+    gap: 10px;
+    margin-bottom: 18px;
     direction: rtl;
 }
+
 .stat-box {
     flex: 1;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px;
-    padding: 8px 4px;
+    background: linear-gradient(145deg, rgba(26,92,40,0.25), rgba(10,31,14,0.5));
+    border: 1px solid rgba(255,215,0,0.18);
+    border-radius: 16px;
+    padding: 14px 6px;
     text-align: center;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-.stat-box-label {
-    font-size: clamp(10px, 2.5vw, 13px);
-    color: #b3b3b3;
-    margin-bottom: 2px;
-    white-space: nowrap;
-}
-.stat-box-value {
-    font-size: clamp(14px, 3.5vw, 18px);
-    font-weight: bold;
-    color: #FFD700;
-    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+    transition: transform 0.2s ease;
 }
 
-/* ستايل كرت توقع بطل المونديال */
-.champion-box-card {
-    background: linear-gradient(135deg, rgba(255, 215, 0, 0.12), rgba(0, 77, 43, 0.4));
-    border: 1px solid rgba(255,255,255,.2);
-    border-radius: 30px;
-    padding: 25px;
-    margin: 20px 0;
-    box-shadow: 0 15px 40px rgba(0,0,0,.45);
-    text-align: center;
+.stat-box:hover { transform: translateY(-2px); }
+
+.stat-box-label {
+    font-size: clamp(10px, 2.5vw, 12px);
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 6px;
+    font-weight: 600;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
 }
-.champion-saved-badge {
-    background: linear-gradient(90deg, #FFD700, #ffa726);
-    color: #000000 !important;
+
+.stat-box-value {
+    font-size: clamp(16px, 4vw, 22px);
     font-weight: 900;
-    font-size: 16px;
-    padding: 6px 18px;
+    color: var(--gold);
+    white-space: nowrap;
+    text-shadow: 0 0 12px rgba(255,215,0,0.4);
+}
+
+/* ===== CHAMPION BOX ===== */
+.champion-box-card {
+    background: linear-gradient(145deg, rgba(20,83,45,0.35) 0%, rgba(10,20,12,0.7) 100%);
+    border: 1px solid rgba(255,215,0,0.25);
+    border-radius: 24px;
+    padding: 28px 24px;
+    margin: 20px 0;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,215,0,0.08);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.champion-box-card::after {
+    content: '🏆';
+    position: absolute;
+    bottom: -15px;
+    right: -10px;
+    font-size: 80px;
+    opacity: 0.06;
+}
+
+.champion-saved-badge {
+    background: linear-gradient(90deg, var(--gold), #FFA726);
+    color: #0A0A0A !important;
+    font-weight: 900;
+    font-size: clamp(13px, 3.5vw, 16px);
+    padding: 8px 22px;
     border-radius: 50px;
     display: inline-block;
-    margin-top: 10px;
-    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    margin-top: 12px;
+    box-shadow: 0 4px 20px rgba(255,215,0,0.35);
+    letter-spacing: 0.3px;
 }
+
+/* ===== BUTTONS ===== */
+.stButton > button {
+    width: 100%;
+    min-height: 46px;
+    border-radius: 14px !important;
+    border: none !important;
+    background: linear-gradient(135deg, #1A7A35 0%, #00C853 100%) !important;
+    color: white !important;
+    font-family: 'Cairo', sans-serif !important;
+    font-weight: 700 !important;
+    font-size: 14px !important;
+    letter-spacing: 0.3px;
+    box-shadow: 0 4px 16px rgba(0,200,83,0.25) !important;
+    transition: all 0.2s ease !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(135deg, var(--gold-dark) 0%, var(--gold) 100%) !important;
+    color: #050F07 !important;
+    box-shadow: 0 6px 20px rgba(255,215,0,0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+.stButton > button:active { transform: translateY(0) !important; }
+
+/* ===== INPUTS ===== */
+.stTextInput > div > div > input,
+.stNumberInput > div > div > input,
+.stSelectbox > div > div,
+.stTextInput input, .stNumberInput input {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,215,0,0.2) !important;
+    border-radius: 12px !important;
+    color: white !important;
+    font-family: 'Cairo', sans-serif !important;
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+    transition: border-color 0.2s ease !important;
+}
+
+.stTextInput > div > div > input:focus,
+.stNumberInput > div > div > input:focus {
+    border-color: rgba(255,215,0,0.5) !important;
+    box-shadow: 0 0 0 3px rgba(255,215,0,0.08) !important;
+}
+
+.stSelectbox > div > div {
+    background: rgba(255,255,255,0.06) !important;
+    border-color: rgba(255,215,0,0.2) !important;
+}
+
+/* ===== RADIO BUTTONS ===== */
+.stRadio > div {
+    gap: 10px !important;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+}
+
+.stRadio label {
+    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(255,215,0,0.15) !important;
+    border-radius: 12px !important;
+    padding: 8px 16px !important;
+    cursor: pointer;
+    transition: all 0.2s ease !important;
+}
+
+.stRadio label:hover {
+    background: rgba(255,215,0,0.1) !important;
+    border-color: rgba(255,215,0,0.35) !important;
+}
+
+/* ===== CHECKBOX (JOKER) ===== */
+.stCheckbox label {
+    background: rgba(255,215,0,0.06);
+    border: 1px solid rgba(255,215,0,0.2);
+    border-radius: 12px;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.stCheckbox label:hover {
+    background: rgba(255,215,0,0.1);
+    border-color: rgba(255,215,0,0.4);
+}
+
+/* ===== DATAFRAME ===== */
+.stDataFrame {
+    border-radius: 16px !important;
+    overflow: hidden !important;
+    border: 1px solid rgba(255,215,0,0.15) !important;
+}
+
+.stDataFrame table {
+    background: rgba(10,31,14,0.6) !important;
+}
+
+.stDataFrame thead tr th {
+    background: rgba(255,215,0,0.12) !important;
+    color: var(--gold) !important;
+    font-weight: 700 !important;
+    font-family: 'Cairo', sans-serif !important;
+}
+
+.stDataFrame tbody tr:hover td {
+    background: rgba(255,215,0,0.05) !important;
+}
+
+/* ===== MESSAGES (SUCCESS / ERROR / INFO) ===== */
+.stSuccess, .stAlert [data-testid="stAlert"] {
+    border-radius: 14px !important;
+    border-left: 4px solid var(--green-bright) !important;
+    background: rgba(0,200,83,0.1) !important;
+}
+
+.stError [data-testid="stAlert"] {
+    border-radius: 14px !important;
+    border-left: 4px solid #FF5252 !important;
+    background: rgba(255,82,82,0.1) !important;
+}
+
+div[data-testid="stAlert"] {
+    border-radius: 14px !important;
+    font-family: 'Cairo', sans-serif !important;
+}
+
+/* ===== SIDEBAR ===== */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #060F07 0%, #0A1F0E 100%) !important;
+    border-right: 1px solid rgba(255,215,0,0.1) !important;
+}
+
+[data-testid="stSidebar"] .stMarkdown {
+    color: var(--white) !important;
+}
+
+/* ===== TOGGLE ===== */
+.stToggle {
+    background: rgba(255,255,255,0.05) !important;
+    border-radius: 10px !important;
+    padding: 8px 12px !important;
+}
+
+/* ===== ADMIN CARD ===== */
+.admin-card {
+    background: linear-gradient(135deg, rgba(91,50,0,0.4), rgba(184,134,11,0.25));
+    border: 1px solid rgba(184,134,11,0.35);
+    border-radius: 20px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+/* ===== REVIEW CARD ===== */
+.review-card {
+    background: linear-gradient(135deg, rgba(0,77,43,0.4), rgba(0,168,90,0.2));
+    border: 1px solid rgba(0,200,83,0.25);
+    border-radius: 20px;
+    padding: 20px 22px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+}
+
+/* ===== JOKER BADGE ===== */
+.joker-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(90deg, rgba(255,215,0,0.12), rgba(255,152,0,0.12));
+    border: 1px solid rgba(255,215,0,0.3);
+    border-radius: 50px;
+    padding: 10px 20px;
+    font-size: clamp(14px, 3.5vw, 17px);
+    font-weight: 800;
+    color: var(--gold);
+    text-shadow: 0 0 10px rgba(255,215,0,0.3);
+    box-shadow: 0 0 20px rgba(255,215,0,0.08);
+    text-align: center;
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+/* ===== LINK BUTTON ===== */
+.stLinkButton a {
+    background: linear-gradient(135deg, #006200, #00a33a) !important;
+    color: white !important;
+    border-radius: 14px !important;
+    border: 1px solid rgba(0,200,83,0.3) !important;
+    font-family: 'Cairo', sans-serif !important;
+    font-weight: 700 !important;
+    padding: 10px 16px !important;
+    text-decoration: none !important;
+    display: block;
+    text-align: center;
+    transition: all 0.2s ease !important;
+    box-shadow: 0 4px 12px rgba(0,163,58,0.2) !important;
+}
+
+.stLinkButton a:hover {
+    background: linear-gradient(135deg, #004d00, #007a2e) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 6px 16px rgba(0,163,58,0.3) !important;
+}
+
+/* ===== SUBHEADERS ===== */
+h2, h3 { color: var(--white) !important; font-family: 'Cairo', sans-serif !important; }
+.stSubheader { color: rgba(255,255,255,0.85) !important; }
+
+/* ===== DIVIDER ===== */
+hr { border-color: rgba(255,215,0,0.12) !important; margin: 20px 0 !important; }
+
+/* ===== FORM ===== */
+[data-testid="stForm"] {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,215,0,0.1);
+    border-radius: 20px;
+    padding: 20px;
+}
+
+/* ===== NUMBER INPUT BUTTONS ===== */
+.stNumberInput button {
+    background: rgba(255,215,0,0.12) !important;
+    border: 1px solid rgba(255,215,0,0.2) !important;
+    border-radius: 8px !important;
+    color: var(--gold) !important;
+    min-height: 32px !important;
+}
+
+.stNumberInput button:hover {
+    background: rgba(255,215,0,0.25) !important;
+}
+
+/* ===== SELECTBOX ===== */
+[data-baseweb="select"] > div {
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,215,0,0.2) !important;
+    border-radius: 12px !important;
+}
+
+[data-baseweb="select"] span {
+    color: white !important;
+    font-family: 'Cairo', sans-serif !important;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.25); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,215,0,0.4); }
+
 </style>
 """, unsafe_allow_html=True)
 
 st.markdown("""
 <div class="main-title">
-WC26 KING 🇸🇦🏆⚽️
+    <div class="main-title-inner">
+        <span class="main-title-trophy">🏆 WC26 KING</span>
+        <span class="main-title-sub">🇸🇦  تحدي ملك المونديال  🇺🇸 🇨🇦</span>
+        <div class="main-title-line"></div>
+    </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -557,8 +958,11 @@ else:
         remaining_jokers = max(0, 8 - used_jokers)
         
         st.markdown(f"""
-        <div style="background: rgba(255, 215, 0, 0.1); border: 1px solid #FFD700; border-radius: 15px; padding: 15px; text-align: center; margin-bottom: 20px;">
-            <span style="font-size: 20px; font-weight: bold; color: #FFD700;">✌🏼 رصيد دبلها المتبقي: {remaining_jokers} من 8 </span>
+        <div class="joker-badge">
+            <span>✌🏼</span>
+            <span>رصيد دبلها المتبقي:</span>
+            <span style="font-size: 1.3em; color: {'#FFD700' if remaining_jokers > 2 else '#FF6B35'};">{remaining_jokers}</span>
+            <span style="color: rgba(255,215,0,0.5); font-weight: 600;">/ 8</span>
         </div>
         """, unsafe_allow_html=True)
 
