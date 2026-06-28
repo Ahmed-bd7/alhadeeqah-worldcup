@@ -541,7 +541,7 @@ if not st.session_state["is_logged_in"]:
                             st.balloons()
             st.markdown('</div>', unsafe_allow_html=True)
         else:
-            st.markdown('<div class="auth-card"><div class="auth-card-title">🔐 أهلاً بك يا متحدي 👋</div>', unsafe_allow_html=True)
+            st.markdown('<div class="auth-card"><div class="auth-card-title">  🇸🇦👋 هلا فيكم ارحببووو</div>', unsafe_allow_html=True)
             login_phone = st.text_input("📱 رقم الجوال", max_chars=10)
             login_pass  = st.text_input("🔐 كلمة المرور", type="password")
             if st.button("تسجيل الدخول 🚀"):
@@ -832,12 +832,12 @@ else:
 
                     pens_winner = None
                     if match["is_knockout"] and h_score == a_score:
-                        st.markdown("⚠️ **مباراة إقصائيةاختر الفائز بالترجيح**")
+                        st.markdown("⚠️ **مباراة إقصائية اختر الفائز بالترجيح**")
                         pens_winner = st.radio(f"الفائز بالترجيح", [match['team_home'], match['team_away']],
                                                index=0 if val_pens == match['team_home'] else 1,
                                                key=f"pens_{match['id']}", horizontal=True)
 
-                    use_joker = st.checkbox("✌🏼 تفعيل الدبلها لهذه المباراة (مضاعفة النقاط!)", value=is_joker_checked, key=f"joker_{match['id']}")
+                    use_joker = st.checkbox("✌🏼 تفعيل التدبيل لهذه المباراة (مضاعفة النقاط!)", value=is_joker_checked, key=f"joker_{match['id']}")
 
                     col_submit, col_share = st.columns(2)
                     with col_submit:
