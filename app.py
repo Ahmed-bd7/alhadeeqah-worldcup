@@ -459,11 +459,11 @@ else:
         st.markdown(f"""
         <div class="stats-container">
             <div class="stat-box">
-                <div class="stat-box-label">✅ توقّع صح</div>
+                <div class="stat-box-label">✅ صحيحة </div>
                 <div class="stat-box-value">{correct_count}</div>
             </div>
             <div class="stat-box">
-                <div class="stat-box-label">❌ أخطأت</div>
+                <div class="stat-box-label">❌ خاطئة</div>
                 <div class="stat-box-value">{wrong_count}</div>
             </div>
             <div class="stat-box">
