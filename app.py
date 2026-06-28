@@ -731,3 +731,98 @@ else:
                 db_conn.commit()
                 st.success("تم تحديث وحسم ترتيب لوحة الصدارة الملكية!")
                 st.rerun()
+                
+    # --- 4. لوحة الإدارة الفاخرة والآمنة (أحمد بادحمان) ---
+    if login_phone == ADMIN_PHONE:
+        with tabs[3]:
+            st.markdown('<div class="admin-card">⚙️ <b>لوحة المشرف العام والتحكم الكامل (أحمد بادحمان)</b></div>', unsafe_allow_html=True)
+            cursor = db_conn.cursor()
+            
+            # ---------------- SECTION 1: إدارة بيانات الأعضاء والسرية ----------------
+            st.markdown("<h3 style='color:#FFD700;'>👥 لوحة التحكم بالأعضاء (الأرقام والباسوردات)</h3>", unsafe_allow_html=True)
+            
+            cursor.execute("SELECT name, phone, password, points FROM users ORDER BY points DESC")
+            all_users_rows = cursor.fetchall()
+            
+            users_df_list = []
+            for u_row in all_users_rows:
+                users_df_list.append({
+                    "👨🏽 الاسم": u_row[0],
+                    "📱 رقم الجوال": u_row[1],
+                    "🔐 كلمة المرور": u_row[2],
+                    "🏆 النقاط الحالية": u_row[3]
+                })
+            
+            # عرض جدول البيانات بالكامل للمشرف
+            st.dataframe(pd.DataFrame(users_df_list), use_container_width=True, hide_index=True)
+            
+            # ---------------- SECTION 2: إضافة وتعديل النقاط يدوياً ----------------
+            st.markdown("<h3 style='color:#FFD700;'>✍🏼 تعديل وإضافة نقاط يدوية للمستخدمين</h3>", unsafe_allow_html=True)
+            
+            user_select_options = {f"{u[0]} ({u[1]})": u[1] for u in all_users_rows}
+            selected_user_for_points = st.selectbox("اختر العضو المراد تعديل نقاطه:", list(user_select_options.keys()))
+            target_user_phone = user_select_options[selected_user_for_points]
+            
+            col_pts_type, col_pts_val = st.columns(2)
+            with col_pts_type:
+                operation_type = st.radio("نوع العملية:", ["➕ إضافة نقاط", "➖ خصم نقاط"], horizontal=True)
+            with col_pts_val:
+                points_to_change = st.number_input("مقدار النقاط:", min_value=1, max_value=100, value=5)
+                
+            if st.button("🎯 اعتماد تعديل النقاط يدوياً"):
+                cursor.execute("SELECT points, name FROM users WHERE phone = ?", (target_user_phone,))
+                current_pts, target_name = cursor.fetchone()
+                
+                if "إضافة" in operation_type:
+                    new_pts_total = current_pts + points_to_change
+                else:
+                    new_pts_total = max(0, current_pts - points_to_change)
+                    
+                cursor.execute("UPDATE users SET points = ? WHERE phone = ?", (new_pts_total, target_user_phone))
+                db_conn.commit()
+                st.success(f"✅ تم تحديث نقاط {target_name} بنجاح! الرصيد الجديد: {new_pts_total} نقطة.")
+                st.rerun()
+                
+            st.markdown("<hr style='border: 1px dashed rgba(255,215,0,0.15); margin: 25px 0;'>", unsafe_allow_html=True)
+
+            # ---------------- SECTION 3: احتساب نتائج المباريات (المنطق السابق) ----------------
+            st.markdown("<h3 style='color:#FFD700;'>🧮 إدخال واحتساب نتائج المباريات</h3>", unsafe_allow_html=True)
+            match_options = {f"{m['team_home']} × {m['team_away']}": m for m in all_matches}
+            selected_match_str = st.selectbox("اختر مباراة لحسم نقاطها:", list(match_options.keys()))
+            selected_match = match_options[selected_match_str]
+            
+            cursor.execute("SELECT actual_home, actual_away, actual_pens_winner FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
+            already_calculated = cursor.fetchone()
+            is_valid_old_result = already_calculated and already_calculated[0] is not None
+            
+            if is_valid_old_result:
+                st.warning(f"المباراة محسومة سابقاً بنتيجة: {already_calculated[0]} - {already_calculated[1]}")
+                if st.button("🚨 إلغاء النتيجة وسحب النقاط من الأعضاء"):
+                    cursor.execute("SELECT phone, pred_home, pred_away, pred_pens_winner, is_joker FROM predictions WHERE match_id = ?", (selected_match["id"],))
+                    for pred in cursor.fetchall():
+                        old_points = calculate_match_points(pred[1], pred[2], pred[3], already_calculated[0], already_calculated[1], already_calculated[2], selected_match["is_knockout"])
+                        if pred[4] == 1: old_points *= 2
+                        if old_points > 0: cursor.execute("UPDATE users SET points = MAX(0, points - ?) WHERE phone = ?", (old_points, pred[0]))
+                    cursor.execute("DELETE FROM processed_matches WHERE match_id = ?", (selected_match["id"],))
+                    db_conn.commit()
+                    st.rerun()
+            
+            c_act_h, c_act_a = st.columns(2)
+            with c_act_h: actual_h = st.number_input("أهداف المستضيف الفعلي", 0, 10, value=already_calculated[0] if is_valid_old_result else 0)
+            with c_act_a: actual_a = st.number_input("أهداف الضيف الفعلي", 0, 10, value=already_calculated[1] if is_valid_old_result else 0)
+            
+            actual_p = None
+            if selected_match["is_knockout"] and actual_h == actual_a:
+                actual_p = st.radio("الفائز الفعلي بالبنتيات:", [selected_match['team_home'], selected_match['team_away']])
+            
+            if st.button("🔥 حسم النقاط وتحديث الصدارة"):
+                cursor.execute("SELECT phone, pred_home, pred_away, pred_pens_winner, is_joker FROM predictions WHERE match_id = ?", (selected_match["id"],))
+                for pred in cursor.fetchall():
+                    pts = calculate_match_points(pred[1], pred[2], pred[3], actual_h, actual_a, actual_p, selected_match["is_knockout"])
+                    if pred[4] == 1: pts *= 2
+                    if pts > 0: cursor.execute("UPDATE users SET points = points + ? WHERE phone = ?", (pts, pred[0]))
+                cursor.execute('INSERT INTO processed_matches (match_id, actual_home, actual_away, actual_pens_winner) VALUES (?, ?, ?, ?)', (selected_match["id"], actual_h, actual_a, actual_p))
+                db_conn.commit()
+                st.success("تم تحديث وحسم ترتيب لوحة الصدارة الملكية!")
+                st.rerun()
+
