@@ -832,7 +832,7 @@ else:
 
                     pens_winner = None
                     if match["is_knockout"] and h_score == a_score:
-                        st.markdown("⚠️ **مباراة إقصائية وتوقعت التعادل! اختر الفائز بالترجيح:**")
+                        st.markdown("⚠️ **مباراة إقصائيةاختر الفائز بالترجيح**")
                         pens_winner = st.radio(f"الفائز بالترجيح", [match['team_home'], match['team_away']],
                                                index=0 if val_pens == match['team_home'] else 1,
                                                key=f"pens_{match['id']}", horizontal=True)
@@ -861,7 +861,7 @@ else:
                         pens_tag  = f" | (ترجيح: {pens_winner})" if pens_winner else ""
                         share_text = f"🏆 *WC26 KING #الحديقة_المونديال*\n\n👤 *{user_name}*\n\n⚽ {home_flag} *{match['team_home']} × {match['team_away']}* {away_flag}\n{joker_tag}\n\n🎯 *توقعي:*\n{match['team_home']} {h_score} - {a_score} {match['team_away']}{pens_tag}"
                         wa_link = "https://wa.me/?text=" + urllib.parse.quote(share_text)
-                        st.link_button("📲 واتساب", wa_link, key=f"share_{match['id']}")
+                        st.link_button("📲 مشاركة التوقع", wa_link, key=f"share_{match['id']}")
 
     # ══ تبويب المواعيد ══
     with tab_schedule:
