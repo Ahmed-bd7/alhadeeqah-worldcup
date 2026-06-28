@@ -273,12 +273,21 @@ def get_internal_matches():
 {"id": 72, "team_home": "الأردن", "team_away": "الأرجنتين", "time": datetime(2026, 6, 28, 5, 0, tzinfo=ksa_tz)},
 # ===== دور الـ32 =====
 {"id": 73, "team_home": "كندا", "team_away": "جنوب أفريقيا", "time": datetime(2026, 6, 28, 22, 0, tzinfo=ksa_tz)},
-{"id": 74, "team_home": "اليابان", "team_away": "البرازيل", "time": datetime(2026, 6, 29, 20, 0, tzinfo=ksa_tz)},
-{"id": 75, "team_home": "المغرب", "team_away": "هولندا", "time": datetime(2026, 6, 30, 4, 0, tzinfo=ksa_tz)},
-{"id": 76, "team_home": "النرويج", "team_away": "ساحل العاج", "time": datetime(2026, 6, 30, 20, 0, tzinfo=ksa_tz)},
-{"id": 77, "team_home": "السويد", "team_away": "فرنسا", "time": datetime(2026, 7, 1, 0, 0, tzinfo=ksa_tz)},
-{"id": 78, "team_home": "الولايات المتحدة", "team_away": "البوسنة والهرسك", "time": datetime(2026, 7, 2, 3, 0, tzinfo=ksa_tz)},
-{"id": 79, "team_home": "الأرجنتين", "team_away": "الرأس الأخضر", "time": datetime(2026, 7, 4, 1, 0, tzinfo=ksa_tz)},
+{"id": 74, "team_home": "البرازيل", "team_away": "اليابان", "time": datetime(2026, 6, 29, 20, 0, tzinfo=ksa_tz)},
+{"id": 75, "team_home": "ألمانيا", "team_away": "باراغواي", "time": datetime(2026, 6, 29, 23, 30, tzinfo=ksa_tz)},
+{"id": 76, "team_home": "هولندا", "team_away": "المغرب", "time": datetime(2026, 6, 30, 4, 0, tzinfo=ksa_tz)},
+{"id": 77, "team_home": "النرويج", "team_away": "ساحل العاج", "time": datetime(2026, 6, 30, 20, 0, tzinfo=ksa_tz)},
+{"id": 78, "team_home": "فرنسا", "team_away": "السويد", "time": datetime(2026, 7, 1, 0, 0, tzinfo=ksa_tz)},
+{"id": 79, "team_home": "المكسيك", "team_away": "الإكوادور", "time": datetime(2026, 7, 1, 4, 0, tzinfo=ksa_tz)},
+{"id": 80, "team_home": "إنجلترا", "team_away": "الكونغو الديمقراطية", "time": datetime(2026, 7, 1, 19, 0, tzinfo=ksa_tz)},
+{"id": 81, "team_home": "بلجيكا", "team_away": "السنغال", "time": datetime(2026, 7, 1, 23, 0, tzinfo=ksa_tz)},
+{"id": 82, "team_home": "الولايات المتحدة", "team_away": "البوسنة والهرسك", "time": datetime(2026, 7, 2, 3, 0, tzinfo=ksa_tz)},
+{"id": 83, "team_home": "إسبانيا", "team_away": "النمسا", "time": datetime(2026, 7, 2, 22, 0, tzinfo=ksa_tz)},
+{"id": 84, "team_home": "البرتغال", "team_away": "كرواتيا", "time": datetime(2026, 7, 3, 2, 0, tzinfo=ksa_tz)},
+{"id": 85, "team_home": "سويسرا", "team_away": "الجزائر", "time": datetime(2026, 7, 3, 6, 0, tzinfo=ksa_tz)},
+{"id": 86, "team_home": "أستراليا", "team_away": "مصر", "time": datetime(2026, 7, 3, 21, 0, tzinfo=ksa_tz)},
+{"id": 87, "team_home": "الأرجنتين", "team_away": "الرأس الأخضر", "time": datetime(2026, 7, 4, 1, 0, tzinfo=ksa_tz)},
+{"id": 88, "team_home": "كولومبيا", "team_away": "غانا", "time": datetime(2026, 7, 4, 4, 30, tzinfo=ksa_tz)},
     ]
 
 all_matches = get_internal_matches()
