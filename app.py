@@ -806,7 +806,7 @@ else:
                     card_class = "locked" if is_locked else "match-card"
                     st.markdown(f"""
                     <div class="{card_class}">
-                      <div class="match-meta">📅 {match['time'].strftime('%d يونيو | %I:%M %p')}</div>
+                      <div class="match-meta">📅 {match['time'].strftime('%d | %I:%M %p')}</div>
                       <div class="match-teams">
                         <div class="team-side"><span class="team-flag">{home_flag}</span><div class="team-name">{match['team_home']}</div></div>
                         <div class="match-vs">×</div>
