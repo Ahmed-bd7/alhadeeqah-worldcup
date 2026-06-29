@@ -622,7 +622,7 @@ else:
             </div>""", unsafe_allow_html=True)
             cb,_ = st.columns([1,3])
             with cb:
-                if st.button("🔍 كشف", key=f"rev_{p_phone}_{idx}"):
+                if st.button("🔍 مشاهدة التوقعات", key=f"rev_{p_phone}_{idx}"):
                     st.session_state["view_predictions_for"]  = p_phone
                     st.session_state["view_predictions_name"] = p_name
 
