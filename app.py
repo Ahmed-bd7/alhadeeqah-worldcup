@@ -729,7 +729,7 @@ else:
 
             st.markdown(f"""
             <div class="match-card {'locked' if is_locked else ''}">
-              <div class="match-meta">📅 {match['time'].strftime('%d يونيو | %I:%M %p')}</div>
+              <div class="match-meta">📅 {match['time'].strftime('%d | %I:%M %p')}</div>
               {cd_html}
               <div class="match-teams">
                 <div class="team-side"><span class="team-flag">{hf}</span><div class="team-name">{match['team_home']}</div></div>
