@@ -135,19 +135,26 @@ p,label,div,span,li,h1,h2,h3,h4,h5,h6,.stMarkdown,.stText { color: var(--text) !
 [data-testid="stNumberInput"] input,
 [data-testid="stTextInput"] input,
 [data-testid="stPasswordInput"] input {
-  background:rgba(255,255,255,0.05) !important; border:1px solid var(--border) !important;
-  border-radius:12px !important; color:var(--text) !important;
+  background:#0d1f10 !important; border:1px solid rgba(255,215,0,0.25) !important;
+  border-radius:12px !important; color:#ffffff !important;
   font-family:'Oswald',sans-serif !important; font-size:22px !important;
   font-weight:700 !important; text-align:center !important;
+  -webkit-text-fill-color:#ffffff !important;
 }
 [data-testid="stNumberInput"] input:focus,
 [data-testid="stTextInput"] input:focus,
 [data-testid="stPasswordInput"] input:focus {
-  border-color:var(--gold) !important; box-shadow:0 0 0 2px rgba(255,215,0,0.12) !important;
+  border-color:var(--gold) !important; box-shadow:0 0 0 2px rgba(255,215,0,0.18) !important;
+  color:#ffffff !important; -webkit-text-fill-color:#ffffff !important;
 }
+/* placeholder */
+[data-testid="stNumberInput"] input::placeholder,
+[data-testid="stTextInput"] input::placeholder,
+[data-testid="stPasswordInput"] input::placeholder { color:rgba(255,255,255,0.35) !important; -webkit-text-fill-color:rgba(255,255,255,0.35) !important; }
+
 [data-testid="stSelectbox"] > div > div {
-  background:rgba(255,255,255,0.05) !important; border:1px solid var(--border) !important;
-  border-radius:12px !important; color:var(--text) !important; font-family:'Cairo',sans-serif !important;
+  background:#0d1f10 !important; border:1px solid rgba(255,215,0,0.25) !important;
+  border-radius:12px !important; color:#ffffff !important; font-family:'Cairo',sans-serif !important;
 }
 [data-testid="stCheckbox"] label span,
 [data-testid="stToggle"] label,
