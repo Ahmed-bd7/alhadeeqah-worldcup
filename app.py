@@ -501,7 +501,6 @@ if not st.session_state["is_logged_in"]:
                             db_conn.commit(); st.success(f"🎉 تم إنشاء حسابك يا {new_name}!"); st.balloons()
             st.markdown('</div>', unsafe_allow_html=True)
         else:
-            st.markdown('<div class="auth-card fade-up"><div class="auth-card-title">🔐 أهلاً بك يا متحدي 👋</div>', unsafe_allow_html=True)
             login_phone = st.text_input("📱 رقم الجوال", max_chars=10)
             login_pass  = st.text_input("🔐 كلمة المرور", type="password")
             if st.button("تسجيل الدخول 🚀"):
@@ -683,8 +682,8 @@ else:
         remaining_jokers = max(0, 8-used_jokers)
         st.markdown(f"""
         <div class="joker-banner fade-up">
-          <strong>✌🏼 رصيد الدبلها: {remaining_jokers} من 8</strong>
-          <small>فعّل الدبلها على مباراة لمضاعفة نقاطك</small>
+          <strong>✌🏼 رصيد دبلها: {remaining_jokers} من 8</strong>
+          <small>فعّل دبلها على مباراة لمضاعفة نقاطك</small>
           {make_joker_dots(used_jokers)}
         </div>""", unsafe_allow_html=True)
 
@@ -756,7 +755,7 @@ else:
                 st.markdown("⚠️ **مباراة إقصائية — اختر الفائز بالترجيح:**")
                 pw = st.radio("الفائز بالترجيح", [match['team_home'],match['team_away']], index=0 if vp==match['team_home'] else 1, key=f"pens_{match['id']}", horizontal=True)
 
-            use_joker = st.checkbox("✌🏼 تفعيل الدبلها (مضاعفة النقاط!)", value=jk, key=f"joker_{match['id']}")
+            use_joker = st.checkbox("✌🏼 تفعيل دبلها (مضاعفة النقاط!)", value=jk, key=f"joker_{match['id']}")
 
             cs2,csh2 = st.columns(2)
             with cs2:
@@ -775,7 +774,7 @@ else:
                 jt = "✌🏼 [دبلها]" if use_joker else ""
                 pt = f" | (ترجيح: {pw})" if pw else ""
                 wa = "https://wa.me/?text="+urllib.parse.quote(f"🏆 *WC26 KING #الحديقة_المونديال*\n\n👤 *{user_name}*\n\n⚽ {hf} *{match['team_home']} × {match['team_away']}* {af}\n{jt}\n\n🎯 *توقعي:* {match['team_home']} {hs} - {as_} {match['team_away']}{pt}\n\n#WC26_KING 🔥⚽️")
-                st.link_button("📲 واتساب", wa, key=f"share_{match['id']}")
+                st.link_button("📲مشاركة التوقع ", wa, key=f"share_{match['id']}")
 
     # ══ SCHEDULE ══
     with tab_schedule:
