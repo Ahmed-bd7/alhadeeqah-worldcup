@@ -709,7 +709,7 @@ else:
                 tp_txt = f" (ترجيح: {ap})" if ap else ""
                 st.markdown(f"""
                 <div class="match-card done">
-                  <div class="match-meta">📅 {match['time'].strftime('%d يونيو | %I:%M %p')}</div>
+                  <div class="match-meta">📅 {match['time'].strftime('%d  | %I:%M %p')}</div>
                   <div class="match-teams">
                     <div class="team-side"><span class="team-flag">{hf}</span><div class="team-name">{match['team_home']}</div></div>
                     <div class="match-score">{ah} × {aa}{tp_txt}</div>
