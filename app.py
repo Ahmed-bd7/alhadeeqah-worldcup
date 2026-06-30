@@ -706,7 +706,7 @@ else:
                     ep = calculate_match_points(ph,pa,pp,ah,aa,ap,match["is_knockout"])
                     if pj==1: ep*=2
                     pred_txt = f'<div style="text-align:center;margin-bottom:4px"><span class="user-pred-tag">توقعك: {ph} – {pa}{f" (ترجيح: {pp})" if pp else ""}</span></div>'
-                tp_txt = f" (ترجيح)" if ap else ""
+                tp_txt = f" ✅ " if ap else ""
                 st.markdown(f"""
                 <div class="match-card done">
                   <div class="match-meta">📅 {match['time'].strftime('%d  | %I:%M %p')}</div>
