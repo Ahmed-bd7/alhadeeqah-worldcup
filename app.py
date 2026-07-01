@@ -442,7 +442,11 @@ def calculate_match_points(p_h, p_a, p_p, actual_h, actual_a, actual_p, is_knock
     if p_h == actual_h and p_a == actual_a:
         earned += 3
         if is_knockout and p_h == p_a and p_p == actual_p: earned += 3
-    elif (p_h > p_a and actual_h > actual_a) or (p_h < p_a and actual_h < actual_a):
+    elif (
+        (p_h > p_a and actual_h > actual_a)
+        or (p_h < p_a and actual_h < actual_a)
+        or (p_h == p_a and actual_h == actual_a)
+    ):
         earned += 1
     elif is_knockout and p_h == p_a and actual_h == actual_a:
         if p_p == actual_p: earned += 3
