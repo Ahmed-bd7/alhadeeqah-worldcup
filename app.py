@@ -820,3 +820,30 @@ else:
                     oh,oa,op=ac
                     cursor.execute("SELECT phone,pred_home,pred_away,pred_pens_winner,is_joker FROM predictions WHERE match_id=?",(sm["id"],))
                     for p in cursor.fetchall():
+                        up2,ph,pa,pp,pj=p; pts=calculate_match_points(ph,pa,pp,oh,oa,op,sm["is_knockout"])
+                        if pj==1: pts*=2
+                        if pts>0: cursor.execute("UPDATE users SET points=MAX(0,points-?) WHERE phone=?",(pts,up2))
+                    cursor.execute("DELETE FROM processed_matches WHERE match_id=?",(sm["id"],))
+                cursor.execute("SELECT phone,pred_home,pred_away,pred_pens_winner,is_joker FROM predictions WHERE match_id=?",(sm["id"],))
+                for p in cursor.fetchall():
+                    up2,ph,pa,pp,pj=p; pts=calculate_match_points(ph,pa,pp,ah2,aa2,ap2,sm["is_knockout"])
+                    if pj==1: pts*=2
+                    if pts>0: cursor.execute("UPDATE users SET points=points+? WHERE phone=?",(pts,up2))
+                cursor.execute("INSERT INTO processed_matches (match_id,actual_home,actual_away,actual_pens_winner) VALUES (?,?,?,?)",(sm["id"],ah2,aa2,ap2))
+                db_conn.commit(); st.success("🏆 تم احتساب النقاط!"); st.rerun()
+
+            st.subheader("🛠️ إدارة قاعدة البيانات")
+            cursor.execute("SELECT name,phone,points,password FROM users")
+            ul = cursor.fetchall(); uo={f"{u[0]} ({u[1]})":u for u in ul}
+            if uo:
+                su_str = st.selectbox("إختر العضو:", list(uo.keys()))
+                td = uo[su_str]; ce,cd = st.columns(2)
+                with ce:
+                    np2=st.number_input("تعديل النقاط إلى:", 0, 500, value=td[2])
+                    npass=st.text_input(f"تعديل كلمة مرور {td[0]}:", value=td[3])
+                    if st.button("💾 حفظ التعديلات"):
+                        cursor.execute("UPDATE users SET points=?,password=? WHERE phone=?",(np2,npass,td[1])); db_conn.commit(); st.success("تم!"); st.rerun()
+                with cd:
+                    st.markdown("<br>", unsafe_allow_html=True)
+                    if st.button("❌ حذف هذا العضو نهائياً"):
+                        cursor.execute("DELETE FROM users WHERE phone=?",(td[1],)); db_conn.commit(); st.error("تم الحذف!"); st.rerun()
