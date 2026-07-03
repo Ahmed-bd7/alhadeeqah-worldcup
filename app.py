@@ -432,6 +432,12 @@ def get_internal_matches():
         {"id": 86, "team_home": "أستراليا",            "team_away": "مصر",                  "time": datetime(2026, 7,  3, 21, 0,  tzinfo=ksa_tz), "is_knockout": True},
         {"id": 87, "team_home": "الأرجنتين",           "team_away": "الرأس الأخضر",         "time": datetime(2026, 7,  4, 1,  0,  tzinfo=ksa_tz), "is_knockout": True},
         {"id": 88, "team_home": "كولومبيا",            "team_away": "غانا",                 "time": datetime(2026, 7,  4, 4, 30,  tzinfo=ksa_tz), "is_knockout": True},
+        {"id": 89, "team_home": "المغرب",     "team_away": "كندا",                "time": datetime(2026, 7, 4, 20, 0,  tzinfo=ksa_tz), "is_knockout": True},
+        {"id": 90, "team_home": "باراغواي",   "team_away": "فرنسا",               "time": datetime(2026, 7, 5, 0, 0,   tzinfo=ksa_tz), "is_knockout": True},
+        {"id": 91, "team_home": "البرازيل",   "team_away": "النرويج",             "time": datetime(2026, 7, 5, 23, 0,  tzinfo=ksa_tz), "is_knockout": True},
+        {"id": 92, "team_home": "المكسيك",    "team_away": "إنجلترا",             "time": datetime(2026, 7, 6, 3, 0,   tzinfo=ksa_tz), "is_knockout": True},
+        {"id": 93, "team_home": "إسبانيا",    "team_away": "البرتغال",            "time": datetime(2026, 7, 6, 22, 0,  tzinfo=ksa_tz), "is_knockout": True},
+        {"id": 94, "team_home": "بلجيكا",     "team_away": "الولايات المتحدة",    "time": datetime(2026, 7, 7, 3, 0,   tzinfo=ksa_tz), "is_knockout": True},
     ]
 
 all_matches  = get_internal_matches()
