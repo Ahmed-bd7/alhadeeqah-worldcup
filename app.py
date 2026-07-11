@@ -778,7 +778,7 @@ else:
             with cs2:
                 if st.button("✅ اعتماد التوقع", key=f"btn_{match['id']}"):
                     if use_joker and not jk and remaining_jokers<=0:
-                        st.error("⚠️ استهلكت جميع الجواكر الـ 8!"); st.stop()
+                        st.error("⚠️ استهلكت جميع فرص التدبيل!"); st.stop()
                     cursor.execute('''
                         INSERT INTO predictions (phone,match_id,pred_home,pred_away,pred_pens_winner,is_joker)
                         VALUES (?,?,?,?,?,?)
