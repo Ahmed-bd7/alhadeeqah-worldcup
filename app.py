@@ -695,7 +695,7 @@ else:
 
         cursor.execute("SELECT COUNT(*) FROM predictions WHERE phone=? AND is_joker=1", (login_phone,))
         used_jokers = cursor.fetchone()[0]
-        remaining_jokers = max(0, 8-used_jokers)
+        remaining_jokers = max(0, 2-used_jokers)
         st.markdown(f"""
         <div class="joker-banner fade-up">
           <strong>✌🏼 رصيد دبلها: {remaining_jokers} من 8</strong>
