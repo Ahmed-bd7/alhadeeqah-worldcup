@@ -698,7 +698,7 @@ else:
         remaining_jokers = max(0, 2-used_jokers)
         st.markdown(f"""
         <div class="joker-banner fade-up">
-          <strong>✌🏼 رصيد دبلها: {remaining_jokers} من 2 من</strong>
+          <strong>✌🏼 رصيد دبلها: {remaining_jokers}  2 من</strong>
           <small>فعّل دبلها على مباراة لمضاعفة نقاطك</small>
           {make_joker_dots(used_jokers)}
         </div>""", unsafe_allow_html=True)
