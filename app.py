@@ -663,7 +663,7 @@ else:
         cursor = db_conn.cursor()
         cursor.execute("SELECT champion_pred FROM users WHERE phone=?", (login_phone,))
         current_champ = cursor.fetchone()[0]
-        is_champ_locked = now_ksa >= datetime(2026,6,28,21,0,tzinfo=ksa_tz)
+        is_champ_locked = now_ksa >= datetime(2026,7,14,21,0,tzinfo=ksa_tz)
 
         badge = (f"<div class='champion-saved-badge'>🎯 توقعك: {FLAGS.get(current_champ,'🔮')} {current_champ}</div>" if current_champ
                  else "<div class='champion-saved-badge' style='background:linear-gradient(90deg,#ff5252,#ff1744);color:white!important;'>⚠️ لم تختر بطلاً بعد</div>")
