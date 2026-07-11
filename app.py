@@ -443,7 +443,7 @@ def get_internal_matches():
         {"id": 97, "team_home": "المغرب",    "team_away": "فرنسا",     "time": datetime(2026, 7, 9, 23, 0, tzinfo=ksa_tz), "is_knockout": True},
         {"id": 98, "team_home": "إسبانيا",   "team_away": "بلجيكا",     "time": datetime(2026, 7, 10, 22, 0, tzinfo=ksa_tz), "is_knockout": True},
         {"id": 99, "team_home": "النرويج",   "team_away": "إنجلترا",    "time": datetime(2026, 7, 12, 0, 0, tzinfo=ksa_tz), "is_knockout": True},
-        {"id": 101, "team_home": "الأرجنتين","team_away": "سويسرا",     "time": datetime(2026, 7, 12, 4, 0, tzinfo=ksa_tz), "is_knockout": True},
+        {"id": 100, "team_home": "الأرجنتين","team_away": "سويسرا",     "time": datetime(2026, 7, 12, 4, 0, tzinfo=ksa_tz), "is_knockout": True},
     ]
 
 all_matches  = get_internal_matches()
