@@ -671,7 +671,7 @@ else:
         <div class="champion-box-card fade-up">
           <h2>🏆 بطل كأس العالم 2026</h2>
           <p style="color:#ccc;font-size:13px;margin-bottom:5px;">توقع المنتخب الفائز واكسب <b style="color:#FFD700;">+10 نقاط</b> إضافية!</p>
-          <p style="color:#ff9800;font-size:12px;font-weight:700;margin-bottom:8px;">🔒 يقفل 28 يونيو الساعة 9:00م</p>
+          <p style="color:#ff9800;font-size:12px;font-weight:700;margin-bottom:8px;">🔒 يقفل 14 يوليو الساعة 9:00م</p>
           {badge}
         </div>""", unsafe_allow_html=True)
 
